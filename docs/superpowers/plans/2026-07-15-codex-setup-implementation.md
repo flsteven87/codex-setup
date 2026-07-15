@@ -4,9 +4,9 @@
 
 **Goal:** Build and publish a clean, standalone, public Codex reference setup that tracks only hand-authored assets and safely documents third-party installation.
 
-**Architecture:** Keep the repository at `~/.codex-setup` as a source repository, separate from the runtime-heavy `~/.codex`. Link portable instructions, rules, hooks, and custom skills into their native user locations; keep live config and authentication local; reference marketplace plugins and MCP servers through supported install commands.
+**Architecture:** Keep the repository at `~/.codex-setup` as a source repository, separate from the runtime-heavy `~/.codex`. Link portable instructions, rules, and custom skills into their native user locations; keep live config and authentication local; reference marketplace plugins and MCP servers through supported install commands. Document that current user `PreToolUse` hooks cannot enforce a deny decision.
 
-**Tech Stack:** Bash, Python 3.11, TOML, JSON, Codex CLI 0.144.4+, Codex hooks/rules/skills/plugins/MCP, GitHub secret scanning.
+**Tech Stack:** Bash, Python 3.11, TOML, JSON, Codex CLI 0.144.4+, Codex rules/skills/plugins/MCP, GitHub secret scanning.
 
 ## Global Constraints
 
@@ -139,44 +139,16 @@ git add AGENTS.md rules skills tests/test_content.sh
 git commit -m "feat: add portable codex instructions and skills"
 ```
 
-### Task 3: Add a Codex-native write guard and safe linker
+### Task 3: Add the safe linker
 
 **Files:**
-- Create: `hooks/pre_write_guard.py`
-- Create: `hooks.json`
 - Create: `setup.sh`
-- Create: `tests/test_pre_write_guard.py`
 - Create: `tests/test_setup.sh`
 
 **Interfaces:**
-- Produces: `pre_write_guard.py` as a Codex `PreToolUse` hook that denies secret-bearing paths and patch content.
 - Produces: `setup.sh [--check]` that links repository assets without replacing existing non-matching targets.
 
-- [ ] **Step 1: Write failing hook tests**
-
-Use Python `unittest` with subprocess JSON input. Cover an allowed source patch, a denied `.env` path, a denied private-key path, malformed JSON fall-through, and redacted diagnostics.
-
-Run:
-
-```bash
-uv run python -m unittest tests/test_pre_write_guard.py -v
-```
-
-Expected: fail because the hook does not exist.
-
-- [ ] **Step 2: Implement the hook**
-
-Read Codex hook JSON from stdin. Inspect `tool_name` and `tool_input` for `apply_patch` and shell write commands. Deny sensitive paths including `.env*`, `*.pem`, `*.key`, `.ssh/`, `.aws/`, `.gnupg/`, `credentials*`, and `secrets.*`. Emit the documented `PreToolUse` deny response with a generic reason that never contains the suspected value.
-
-- [ ] **Step 3: Register the hook**
-
-Create `hooks.json` with a `PreToolUse` matcher for `apply_patch|exec_command` and command:
-
-```text
-python3 "$HOME/.codex-setup/hooks/pre_write_guard.py"
-```
-
-- [ ] **Step 4: Write failing setup tests**
+- [ ] **Step 1: Write failing setup tests**
 
 In an isolated temporary `HOME`, assert first-run symlink creation, second-run idempotence, `--check` success, conflict failure, and absence of `config.toml` writes.
 
@@ -188,13 +160,12 @@ bash tests/test_setup.sh
 
 Expected: fail because `setup.sh` does not exist.
 
-- [ ] **Step 5: Implement setup**
+- [ ] **Step 2: Implement setup**
 
 Check `codex`, `git`, `uv`, `jq`, and `rg`; validate source content; then link:
 
 ```text
 AGENTS.md                         -> ~/.codex/AGENTS.md
-hooks.json                        -> ~/.codex/hooks.json
 rules/default.rules               -> ~/.codex/rules/default.rules
 skills/agents/<name>              -> ~/.agents/skills/<name>
 skills/codex/record-nexrex-with-loom -> ~/.codex/skills/record-nexrex-with-loom
@@ -202,14 +173,12 @@ skills/codex/record-nexrex-with-loom -> ~/.codex/skills/record-nexrex-with-loom
 
 If the target is the correct symlink, report success. If any other target exists, report every conflict and exit non-zero without modifying conflicts. Never create or edit `~/.codex/config.toml`.
 
-- [ ] **Step 6: Verify and commit**
+- [ ] **Step 3: Verify and commit**
 
 ```bash
-uv run python -m unittest tests/test_pre_write_guard.py -v
 bash tests/test_setup.sh
-python3 -m json.tool hooks.json >/dev/null
-git add hooks hooks.json setup.sh tests/test_pre_write_guard.py tests/test_setup.sh
-git commit -m "feat: add codex-native safety hooks and setup"
+git add setup.sh tests/test_setup.sh
+git commit -m "feat: add conflict-safe codex setup"
 ```
 
 ### Task 4: Document stable config, plugins, MCP scope, and updates

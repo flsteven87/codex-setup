@@ -15,7 +15,8 @@ a Git repository or as the source for a public snapshot.
 
 - Publish `flsteven87/codex-setup` as a standalone public reference setup.
 - Document a current, maintainable Codex configuration using native Codex
-  concepts: `AGENTS.md`, skills, hooks, rules, plugins, MCP, and project config.
+  concepts: `AGENTS.md`, skills, rules, plugins, MCP, project config, and the
+  documented limitations of user hooks.
 - Track only hand-authored, Codex-specific assets.
 - Make setup safe to inspect and copy without overwriting an existing Codex
   installation.
@@ -44,8 +45,6 @@ codex-setup/
 ├── LICENSE
 ├── config/
 │   └── config.example.toml
-├── hooks/
-│   └── pre_write_guard.py
 ├── rules/
 │   └── default.rules
 ├── skills/
@@ -68,7 +67,8 @@ excluded.
 
 - A portable global `AGENTS.md` containing personal development defaults.
 - Hand-authored Codex skills that currently live outside plugins.
-- Codex-native hooks and command rules maintained by this repository.
+- Codex-native command rules maintained by this repository.
+- Hook guidance that does not claim unsupported blocking behavior.
 - A curated `config.example.toml` built from scratch.
 - Bootstrap, update, verification, and secret-scanning scripts.
 - Installation and maintenance documentation.
@@ -130,7 +130,7 @@ The reference clone location is `~/.codex-setup`.
 
 1. Check required commands such as Codex, Git, `uv`, `jq`, and `rg`.
 2. Validate the repository before installing links.
-3. Link the tracked global instructions, hooks, rules, and custom skills into
+3. Link the tracked global instructions, rules, and custom skills into
    Codex's supported user locations.
 4. Stop on any existing non-matching file or directory. Do not overwrite,
    rename, or delete it.
