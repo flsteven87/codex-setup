@@ -11,18 +11,12 @@ AGENT_SKILLS=(
   design-agentic-systems
   feature-lifecycle
   git-state-audit
-  graphify
   handoff
   housekeeping
   latest
-  linear
   narrate
-  plan-symphony-ticket
-  playwright
-  sentry
   ship
   simplify
-  stitch-design
 )
 
 check_skill() {
@@ -38,16 +32,29 @@ for name in "${AGENT_SKILLS[@]}"; do
   check_skill "$ROOT/skills/agents/$name/SKILL.md"
 done
 
-check_skill "$ROOT/skills/codex/record-nexrex-with-loom/SKILL.md"
-
 test "$(find "$ROOT/skills/agents" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')" = "${#AGENT_SKILLS[@]}"
+test ! -d "$ROOT/skills/codex"
+
+REGISTRY_SKILLS=()
+while IFS='|' read -r id kind _rest; do
+  if [ "$kind" = skill ]; then
+    REGISTRY_SKILLS+=("$id")
+  fi
+done <"$ROOT/config/components.tsv"
+
+test "${#REGISTRY_SKILLS[@]}" = "${#AGENT_SKILLS[@]}"
+for index in "${!AGENT_SKILLS[@]}"; do
+  test "${REGISTRY_SKILLS[$index]}" = "${AGENT_SKILLS[$index]}"
+done
+
 ! rg -n -F "$HOME" "$ROOT/AGENTS.md" "$ROOT/rules" "$ROOT/skills"
 "$ROOT/scripts/check-secrets.sh" "$ROOT/AGENTS.md" "$ROOT/rules/default.rules"
 
-repo_scoped_integration="post""hog"
-if rg -n -i --hidden -g '!.git/**' "$repo_scoped_integration" "$ROOT"; then
-  echo "repository-specific integration found in setup repo" >&2
-  exit 1
-fi
+for repo_scoped_term in "post""hog" "nex""rex" "ai-commerce""-ready"; do
+  if rg -n -i --hidden -g '!.git/**' "$repo_scoped_term" "$ROOT"; then
+    echo "repository-specific content found in setup repo" >&2
+    exit 1
+  fi
+done
 
 echo "content tests: OK"

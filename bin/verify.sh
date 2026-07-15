@@ -19,6 +19,7 @@ cd "$ROOT"
 printf 'Running source checks...\n'
 bash tests/test_check_secrets.sh >/dev/null 2>&1
 bash tests/test_content.sh >/dev/null
+bash tests/test_readme.sh >/dev/null
 bash tests/test_setup.sh >/dev/null 2>&1
 uv run python -m unittest tests/test_config.py
 
