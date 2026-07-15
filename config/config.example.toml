@@ -1,0 +1,35 @@
+# Portable user-level defaults. Copy individual sections into
+# ~/.codex/config.toml after reviewing them; do not overwrite a live config.
+
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+check_for_update_on_startup = true
+
+[sandbox_workspace_write]
+network_access = false
+
+[shell_environment_policy]
+inherit = "core"
+ignore_default_excludes = false
+
+# Official OpenAI documentation.
+[mcp_servers.openaiDeveloperDocs]
+url = "https://developers.openai.com/mcp"
+
+# Current library documentation. The unpinned npm tag follows the package's
+# supported release channel; use an exact version when reproducibility matters.
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp"]
+
+# OAuth-backed issue tracking. Authenticate with: codex mcp login linear
+[mcp_servers.linear]
+url = "https://mcp.linear.app/mcp"
+
+# Optional semantic code navigation. Disabled because modern Codex usually
+# does not need it for everyday repository work. Last verified: 1.5.3.
+[mcp_servers.serena]
+enabled = false
+command = "uvx"
+args = ["--from", "serena-agent==1.5.3", "serena", "start-mcp-server", "--project-from-cwd", "--context=codex"]
+startup_timeout_sec = 15
