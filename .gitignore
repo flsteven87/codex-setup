@@ -1,0 +1,39 @@
+# Credentials and authentication
+.env
+.env.*
+auth.json
+credentials
+credentials.*
+secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Codex runtime state
+sessions/
+archived_sessions/
+shell_snapshots/
+logs/
+log/
+cache/
+plugins/
+attachments/
+generated_images/
+browser/
+tmp/
+.tmp/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+history.jsonl
+
+# Live machine configuration
+/config.toml
+/*.config.toml
+
+# Language and OS artifacts
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
