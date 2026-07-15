@@ -44,4 +44,10 @@ test "$(find "$ROOT/skills/agents" -mindepth 1 -maxdepth 1 -type d | wc -l | tr 
 ! rg -n -F "$HOME" "$ROOT/AGENTS.md" "$ROOT/rules" "$ROOT/skills"
 "$ROOT/scripts/check-secrets.sh" "$ROOT/AGENTS.md" "$ROOT/rules/default.rules"
 
+repo_scoped_integration="post""hog"
+if rg -n -i --hidden -g '!.git/**' "$repo_scoped_integration" "$ROOT"; then
+  echo "repository-specific integration found in setup repo" >&2
+  exit 1
+fi
+
 echo "content tests: OK"

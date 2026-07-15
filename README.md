@@ -107,19 +107,6 @@ url = "https://mcp.example.com/mcp"
 bearer_token_env_var = "EXAMPLE_API_TOKEN"
 ```
 
-### Project-scoped PostHog
-
-As of Codex CLI 0.144.4, plugin enablement is user-level and cannot be reliably scoped by project config. To keep PostHog isolated to one repository, disable the global plugin and configure only its MCP server in that trusted project:
-
-```toml
-# <project>/.codex/config.toml
-[mcp_servers.posthog]
-url = "https://mcp.posthog.com/mcp"
-http_headers = { "x-posthog-mcp-consumer" = "plugin" }
-```
-
-Authenticate through Codex's MCP UI or `codex mcp login posthog`. Do not commit OAuth state.
-
 ### Optional Serena
 
 Modern Codex handles most repository navigation without Serena. The example keeps Serena available but disabled, uses its stable `1.5.3` release, selects `--context=codex`, and derives the active project from the current directory.

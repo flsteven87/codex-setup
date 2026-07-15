@@ -23,7 +23,7 @@ case "$*" in
     cat <<'JSON'
 {"installed":[
   {"pluginId":"superpowers@superpowers-marketplace","enabled":true,"marketplaceSource":{"sourceType":"git"}},
-  {"pluginId":"posthog@posthog","enabled":false,"marketplaceSource":{"sourceType":"git"}},
+  {"pluginId":"disabled-example@example-marketplace","enabled":false,"marketplaceSource":{"sourceType":"git"}},
   {"pluginId":"browser@openai-bundled","enabled":true,"marketplaceSource":{"sourceType":"local"}}
 ]}
 JSON
@@ -49,7 +49,15 @@ rg -Fxq 'plugin marketplace upgrade --json' "$LOG"
 rg -Fxq 'plugin list --json' "$LOG"
 rg -Fxq 'plugin add superpowers@superpowers-marketplace --json' "$LOG"
 rg -Fxq 'doctor --json' "$LOG"
-! rg -q 'plugin add posthog@posthog' "$LOG"
-! rg -q 'plugin add browser@openai-bundled' "$LOG"
+
+if rg -q 'plugin add disabled-example@example-marketplace' "$LOG"; then
+  echo "disabled plugin was unexpectedly re-added" >&2
+  exit 1
+fi
+
+if rg -q 'plugin add browser@openai-bundled' "$LOG"; then
+  echo "bundled plugin was unexpectedly re-added" >&2
+  exit 1
+fi
 
 echo "update script tests: OK"

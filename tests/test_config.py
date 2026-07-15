@@ -19,7 +19,6 @@ class ConfigExampleTests(unittest.TestCase):
     def test_contains_no_project_or_literal_authorization_state(self) -> None:
         self.assertNotIn("projects", self.config)
         self.assertNotIn("authorization", self.text.lower())
-        self.assertNotIn("posthog", self.text.lower())
 
     def test_serena_is_codex_aware_and_disabled_by_default(self) -> None:
         serena = self.config["mcp_servers"]["serena"]
