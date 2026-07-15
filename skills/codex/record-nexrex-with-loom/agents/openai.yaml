@@ -1,0 +1,4 @@
+interface:
+  display_name: "Record NexRex with Loom"
+  short_description: "Record a short NexRex Chrome proof with Loom"
+  default_prompt: "Use $record-nexrex-with-loom to record a short NexRex Chrome UI proof in Loom."

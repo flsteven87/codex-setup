@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design Agentic Systems"
+  short_description: "Design agents and LLM pipelines"
+  default_prompt: "Use $design-agentic-systems to design a reliable agent or LLM pipeline before implementation."

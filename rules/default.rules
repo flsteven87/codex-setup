@@ -1,0 +1,213 @@
+# Codex command safety rules (Starlark).
+# Docs: https://developers.openai.com/codex/rules
+
+# Publishing code is an external write and should remain visible to the user.
+prefix_rule(
+    pattern=["git", "push"],
+    decision="prompt",
+    justification="Push only after the user explicitly authorizes publishing the verified change.",
+    match=["git push origin feature/my-branch"],
+)
+
+# Local commits are allowed.
+prefix_rule(
+    pattern=["git", "commit"],
+    decision="allow",
+    justification="Local commits record staged changes without modifying remote state.",
+    match=["git commit -m \"...\""],
+)
+
+prefix_rule(
+    pattern=["git", "rebase"],
+    decision="prompt",
+    justification="Rebase rewrites local history; confirm that the target branch and ownership are clear.",
+    match=["git rebase main"],
+)
+
+prefix_rule(
+    pattern=["git", "commit", "--amend"],
+    decision="prompt",
+    justification="Amending rewrites the current commit; confirm that it has not been shared.",
+    match=["git commit --amend"],
+)
+
+prefix_rule(
+    pattern=["git", "reset", "--hard"],
+    decision="prompt",
+    justification="Hard reset can discard local changes.",
+    match=["git reset --hard HEAD~1"],
+)
+
+prefix_rule(
+    pattern=["git", "clean"],
+    decision="prompt",
+    justification="git clean permanently removes untracked files.",
+    match=["git clean -fdx"],
+)
+
+# Destructive file-system operations should require confirmation.
+prefix_rule(
+    pattern=["rm", "-rf"],
+    decision="prompt",
+    justification="Recursive forced delete is destructive.",
+    match=["rm -rf build/"],
+)
+
+prefix_rule(
+    pattern=["rm"],
+    decision="prompt",
+    justification="File deletion is destructive; confirm intent before removing files.",
+    match=["rm file.txt"],
+)
+
+prefix_rule(
+    pattern=["rmdir"],
+    decision="prompt",
+    justification="Directory deletion is destructive; confirm intent before removing directories.",
+    match=["rmdir some-dir"],
+)
+
+prefix_rule(
+    pattern=["sudo"],
+    decision="prompt",
+    justification="sudo runs commands with elevated privileges; confirm intent.",
+    match=["sudo rm -rf /some/path"],
+)
+
+prefix_rule(
+    pattern=["chmod", "777"],
+    decision="prompt",
+    justification="chmod 777 is almost always unsafe; confirm intent and consider least privilege.",
+    match=["chmod 777 some-file"],
+)
+
+prefix_rule(
+    pattern=["kill", "-9"],
+    decision="prompt",
+    justification="SIGKILL (-9) force-kills processes; confirm intent.",
+    match=["kill -9 12345"],
+)
+
+prefix_rule(
+    pattern=["killall"],
+    decision="prompt",
+    justification="killall can terminate multiple processes; confirm intent.",
+    match=["killall node"],
+)
+
+prefix_rule(
+    pattern=["pkill"],
+    decision="prompt",
+    justification="pkill can terminate multiple processes; confirm intent.",
+    match=["pkill -f uvicorn"],
+)
+
+prefix_rule(
+    pattern=["shutdown"],
+    decision="prompt",
+    justification="shutdown affects system availability; confirm intent.",
+    match=["shutdown -h now"],
+)
+
+prefix_rule(
+    pattern=["reboot"],
+    decision="prompt",
+    justification="reboot affects system availability; confirm intent.",
+    match=["reboot"],
+)
+
+prefix_rule(
+    pattern=["launchctl"],
+    decision="prompt",
+    justification="launchctl changes system services; confirm intent.",
+    match=["launchctl kickstart -k system/com.example.service"],
+)
+
+prefix_rule(
+    pattern=["defaults", "write"],
+    decision="prompt",
+    justification="defaults write changes system/app preferences; confirm intent.",
+    match=["defaults write com.example Foo -bool true"],
+)
+
+prefix_rule(
+    pattern=["networksetup"],
+    decision="prompt",
+    justification="networksetup changes system network settings; confirm intent.",
+    match=["networksetup -setairportpower en0 off"],
+)
+
+prefix_rule(
+    pattern=["csrutil"],
+    decision="prompt",
+    justification="csrutil changes system integrity protection settings; confirm intent.",
+    match=["csrutil status"],
+)
+
+prefix_rule(
+    pattern=["spctl"],
+    decision="prompt",
+    justification="spctl changes Gatekeeper policy; confirm intent.",
+    match=["spctl --status"],
+)
+
+# Prefer uv in uv-based Python projects (avoid bare pip installs).
+prefix_rule(
+    pattern=["pip", "install"],
+    decision="prompt",
+    justification="Prefer `uv add ...` in projects managed by uv. Use pip only when truly necessary.",
+    match=["pip install ruff"],
+)
+
+prefix_rule(
+    pattern=["pip3", "install"],
+    decision="prompt",
+    justification="Prefer `uv add ...` in projects managed by uv. Use pip only when truly necessary.",
+    match=["pip3 install ruff"],
+)
+
+prefix_rule(
+    pattern=["python", "-m", "pip"],
+    decision="prompt",
+    justification="Prefer `uv add ...` in projects managed by uv. Use pip only when truly necessary.",
+    match=["python -m pip install ruff"],
+)
+
+prefix_rule(
+    pattern=["python3", "-m", "pip"],
+    decision="prompt",
+    justification="Prefer `uv add ...` in projects managed by uv. Use pip only when truly necessary.",
+    match=["python3 -m pip install ruff"],
+)
+
+# High-risk disk operations should not be run.
+prefix_rule(
+    pattern=["mkfs"],
+    decision="forbidden",
+    justification="Disk formatting is destructive and out of scope for normal development tasks.",
+    match=["mkfs /dev/sda1"],
+)
+
+prefix_rule(
+    pattern=["dd"],
+    decision="prompt",
+    justification="dd can overwrite disks or large files if used incorrectly.",
+    match=["dd if=input.img of=/dev/sda"],
+)
+prefix_rule(pattern=["git", "fetch"], decision="allow")
+prefix_rule(pattern=["uv", "run", "pytest"], decision="allow")
+prefix_rule(pattern=["uv", "run", "python"], decision="allow")
+prefix_rule(pattern=["docker-compose", "up", "-d"], decision="allow")
+prefix_rule(pattern=["uv", "run", "black"], decision="allow")
+prefix_rule(pattern=["uv", "run", "ruff"], decision="allow")
+prefix_rule(pattern=["git", "rm", "--cached"], decision="allow")
+prefix_rule(pattern=["git", "mv"], decision="allow")
+prefix_rule(
+    pattern=["git", "stash", "drop"],
+    decision="prompt",
+    justification="Dropping a stash can remove the only remaining copy of local work.",
+    match=["git stash drop stash@{0}"],
+)
+prefix_rule(pattern=["git", "add", "-u"], decision="allow")
+prefix_rule(pattern=["git", "add"], decision="allow")
+prefix_rule(pattern=["codex", "--version"], decision="allow")

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Git State Audit"
+  short_description: "Collect and audit git state before cleanup"
+  default_prompt: "Use $git-state-audit to collect repository evidence and recommend git cleanup actions by risk."

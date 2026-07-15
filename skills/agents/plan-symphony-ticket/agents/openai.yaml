@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plan Symphony Ticket"
+  short_description: "Turn a topic into a Symphony-ready Linear ticket."
+  default_prompt: "Help me refine this topic into a Symphony-ready Linear ticket for ai-commerce-ready:"

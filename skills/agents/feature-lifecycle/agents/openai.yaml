@@ -1,0 +1,6 @@
+interface:
+  display_name: "Feature Lifecycle"
+  short_description: "Run an explicit end-to-end feature workflow"
+  default_prompt: "Use $feature-lifecycle to take this feature through design, planning, implementation, verification, and the authorized finish step."
+policy:
+  allow_implicit_invocation: false
