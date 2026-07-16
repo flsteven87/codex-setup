@@ -5,6 +5,12 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 test -f "$ROOT/AGENTS.md"
 test -f "$ROOT/rules/default.rules"
+test -f "$ROOT/agents/explorer.toml"
+
+rg -q '^name = "explorer"$' "$ROOT/agents/explorer.toml"
+rg -q '^model = "gpt-5.6-terra"$' "$ROOT/agents/explorer.toml"
+rg -q '^model_reasoning_effort = "high"$' "$ROOT/agents/explorer.toml"
+! rg -q '^sandbox_mode' "$ROOT/agents/explorer.toml"
 
 AGENT_SKILLS=(
   catchup
@@ -77,8 +83,8 @@ for index in "${!AGENT_SKILLS[@]}"; do
   test "${REGISTRY_SKILLS[$index]}" = "${AGENT_SKILLS[$index]}"
 done
 
-! rg -n -F "$HOME" "$ROOT/AGENTS.md" "$ROOT/rules" "$ROOT/skills"
-"$ROOT/scripts/check-secrets.sh" "$ROOT/AGENTS.md" "$ROOT/rules/default.rules"
+! rg -n -F "$HOME" "$ROOT/AGENTS.md" "$ROOT/agents" "$ROOT/rules" "$ROOT/skills"
+"$ROOT/scripts/check-secrets.sh" "$ROOT/AGENTS.md" "$ROOT/agents/explorer.toml" "$ROOT/rules/default.rules"
 
 for repo_scoped_term in "post""hog" "nex""rex" "ai-commerce""-ready"; do
   if rg -n -i --hidden -g '!.git/**' "$repo_scoped_term" "$ROOT"; then

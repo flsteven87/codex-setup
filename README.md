@@ -12,9 +12,9 @@ Use this repository if you want a clean Codex setup with three clear ownership l
 
 1. Codex owns its built-in system skills and plugins.
 2. [Matt Pocock's upstream package](https://github.com/mattpocock/skills) owns the general engineering workflow and remains unmodified.
-3. This repository owns only portable instructions, safety rules, and eleven focused personal skills.
+3. This repository owns only portable instructions, safety rules, one focused exploration agent, and eleven focused personal skills.
 
-The default installer creates only two baseline links. Personal skills are opt-in, and Matt's package is installed from its upstream repository rather than copied here.
+The default installer creates only three baseline links. Personal skills are opt-in, and Matt's package is installed from its upstream repository rather than copied here.
 
 Retired orchestration frameworks, replacement handoff implementations, and overlapping cleanup workflows are intentionally absent. Product-specific instructions and repository integrations belong in the repository that owns them.
 
@@ -40,7 +40,7 @@ git clone https://github.com/flsteven87/codex-setup.git ~/.codex-setup
 cd ~/.codex-setup
 ```
 
-Review what is available and preview the default two links without changing files:
+Review what is available and preview the default three links without changing files:
 
 ```bash
 bash setup.sh --help
@@ -57,10 +57,13 @@ bash setup.sh --check
 
 This links:
 
-- `AGENTS.md` to `~/.codex/AGENTS.md`; and
-- `rules/default.rules` to `~/.codex/rules/default.rules`.
+- `AGENTS.md` to `~/.codex/AGENTS.md`;
+- `rules/default.rules` to `~/.codex/rules/default.rules`; and
+- `agents/explorer.toml` to `~/.codex/agents/explorer.toml`.
 
 It does not edit `~/.codex/config.toml`, authentication, MCP, plugin state, or third-party skills.
+
+The `explorer-agent` baseline component keeps the parent task's permission mode while routing read-heavy scans to `gpt-5.6-terra` with high reasoning effort. The main agent remains on the model and reasoning defaults selected by the live Codex configuration.
 
 To install personal skills, name each one explicitly and reuse the same selection for checks or removal:
 
@@ -201,6 +204,8 @@ Use global MCP only for capabilities useful across repositories. Put repository-
 
 [`config/config.example.toml`](config/config.example.toml) is a reference, not an install target. Copy only the sections you understand into live config.
 
+The example uses `danger-full-access` with on-request approval for a high-trust local workflow. Command rules still prompt for recursive deletion and selected destructive operations. Choose a narrower sandbox if the host is not already trusted.
+
 Prefer OAuth or environment-backed credentials over literal tokens:
 
 ```toml
@@ -242,13 +247,14 @@ Run `bash bin/verify.sh` when you also want `codex doctor` to validate the activ
 - Installer: macOS and Linux Bash; WSL is the Windows path.
 - Last verified: Codex CLI 0.144.4 and skills CLI 1.5.17 on 2026-07-16.
 - Matt core catalog: 22 unmodified upstream skills verified at `e9fcdf95b402d360f90f1db8d776d5dd450f9234`.
-- Model selection is intentionally unset so Codex can use the account's current default.
+- Main-agent model selection is intentionally unset so Codex can use the account's current default. The portable explorer is deliberately pinned to `gpt-5.6-terra` with high reasoning effort.
 - Marketplace and MCP commands are guidance, not pinned copies; review provider changes before updating commands or compatibility pins.
 
 ## Repository layout
 
 ```text
 AGENTS.md                       Portable personal defaults
+agents/explorer.toml            Efficient read-heavy custom agent
 config/components.tsv           Installable local component registry
 config/matt-pocock-skills.txt   Reviewed Matt core catalog and upstream commit
 config/config.example.toml      Reviewed configuration examples

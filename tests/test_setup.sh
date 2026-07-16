@@ -30,6 +30,8 @@ run_setup "$DEFAULT_HOME" --check
 test -L "$DEFAULT_HOME/.codex/AGENTS.md"
 test "$(readlink "$DEFAULT_HOME/.codex/AGENTS.md")" = "$ROOT/AGENTS.md"
 test -L "$DEFAULT_HOME/.codex/rules/default.rules"
+test -L "$DEFAULT_HOME/.codex/agents/explorer.toml"
+test "$(readlink "$DEFAULT_HOME/.codex/agents/explorer.toml")" = "$ROOT/agents/explorer.toml"
 test ! -e "$DEFAULT_HOME/.agents/skills"
 test ! -e "$DEFAULT_HOME/.codex/config.toml"
 
@@ -65,6 +67,7 @@ run_setup "$UNINSTALL_HOME" --skill ship
 run_setup "$UNINSTALL_HOME" --uninstall --skill ship
 test ! -e "$UNINSTALL_HOME/.codex/AGENTS.md"
 test ! -e "$UNINSTALL_HOME/.codex/rules/default.rules"
+test ! -e "$UNINSTALL_HOME/.codex/agents/explorer.toml"
 test ! -e "$UNINSTALL_HOME/.agents/skills/ship"
 run_setup "$UNINSTALL_HOME" --uninstall --skill ship
 

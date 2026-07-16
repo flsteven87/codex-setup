@@ -39,6 +39,10 @@ uv run --with ruff ruff check tests/test_config.py
 
 codex execpolicy check --pretty --rules rules/default.rules -- git reset --hard HEAD~1 \
   | jq -e '.decision == "prompt"' >/dev/null
+codex execpolicy check --pretty --rules rules/default.rules -- rm -rf build/ \
+  | jq -e '.decision == "prompt"' >/dev/null
+codex execpolicy check --pretty --rules rules/default.rules -- git push origin feature/example \
+  | jq -e '.decision == "allow"' >/dev/null
 codex execpolicy check --pretty --rules rules/default.rules -- mkfs /dev/example \
   | jq -e '.decision == "forbidden"' >/dev/null
 

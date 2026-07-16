@@ -2,11 +2,8 @@
 # ~/.codex/config.toml after reviewing them; do not overwrite a live config.
 
 approval_policy = "on-request"
-sandbox_mode = "workspace-write"
+sandbox_mode = "danger-full-access"
 check_for_update_on_startup = true
-
-[sandbox_workspace_write]
-network_access = false
 
 [shell_environment_policy]
 inherit = "core"

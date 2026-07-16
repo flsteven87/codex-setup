@@ -16,6 +16,10 @@ class ConfigExampleTests(unittest.TestCase):
     def test_leaves_model_selection_to_codex(self) -> None:
         self.assertNotIn("model", self.config)
 
+    def test_uses_high_trust_local_execution(self) -> None:
+        self.assertEqual(self.config["approval_policy"], "on-request")
+        self.assertEqual(self.config["sandbox_mode"], "danger-full-access")
+
     def test_contains_no_project_or_literal_authorization_state(self) -> None:
         self.assertNotIn("projects", self.config)
         self.assertNotIn("authorization", self.text.lower())

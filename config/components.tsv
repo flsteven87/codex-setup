@@ -1,5 +1,6 @@
 instructions|baseline|AGENTS.md|.codex/AGENTS.md|Portable global working agreements|None
 rules|baseline|rules/default.rules|.codex/rules/default.rules|Command escalation and denial policy|None
+explorer-agent|baseline|agents/explorer.toml|.codex/agents/explorer.toml|Efficient read-heavy exploration agent|None
 catchup|skill|skills/agents/catchup|.agents/skills/catchup|Rebuild context and summarize current work|None
 design-agentic-systems|skill|skills/agents/design-agentic-systems|.agents/skills/design-agentic-systems|Design and review agentic systems|None
 git-state-audit|skill|skills/agents/git-state-audit|.agents/skills/git-state-audit|Audit repository state and cleanup safety|GitHub CLI for GitHub-aware checks
