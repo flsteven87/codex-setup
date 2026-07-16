@@ -1,0 +1,6 @@
+interface:
+  display_name: "Graphify"
+  short_description: "Query and maintain Graphify knowledge graphs"
+  default_prompt: "Use $graphify to inspect the nearest active graph for this repository relationship question."
+policy:
+  allow_implicit_invocation: false

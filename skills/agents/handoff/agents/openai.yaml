@@ -1,6 +1,0 @@
-interface:
-  display_name: "Handoff"
-  short_description: "Save concise session continuity notes"
-  default_prompt: "Use $handoff to save the current work state for the next session."
-policy:
-  allow_implicit_invocation: true

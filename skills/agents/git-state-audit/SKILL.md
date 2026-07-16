@@ -1,6 +1,6 @@
 ---
 name: git-state-audit
-description: Use when the user asks for git audit, git status audit, git 全景, git 現況, 整理 git, branch/stash/worktree cleanup, handoff safety, or whether local git state is safe to clean.
+description: Use only when the user explicitly invokes `$git-state-audit` to collect read-only repository evidence and produce a git-state and cleanup-risk report.
 ---
 
 # Git State Audit
@@ -10,9 +10,9 @@ Produce an evidence-backed repository state report and cleanup risk map. Report 
 ## Rules
 
 - Final user-facing audit report MUST be in Traditional Chinese unless the user explicitly requests another language.
-- Allowed: read-only git commands, `scripts/git_state_audit.py`, `git fetch --all --prune --tags`, and `git pull --ff-only` only when current branch is clean local `main` that is only behind `origin/main`.
-- Never stage, commit, push, edit files, delete branches/stashes/worktrees, reset, clean, prune, force-push, or otherwise mutate repository state during the audit.
-- If fetch/pull hits GitHub auth or visibility errors, inspect `gh auth status` and `gh auth switch --help`; if another authenticated account likely has access, switch once non-interactively and retry the safe fetch/pull once. Redact token-like values.
+- Default to read-only local evidence. The helper must not fetch, pull, or switch GitHub accounts unless the user explicitly requested that specific update.
+- Never stage, commit, push, edit files, delete branches/stashes/worktrees, reset, run `git clean` or `git worktree prune`, force-push, or otherwise mutate repository state during the audit.
+- Never switch GitHub accounts without explicit approval after reporting the active account and intended target account. Redact token-like values.
 - If the audit supports cleanup/housekeeping, complete this audit before recommending any deletion.
 
 ## Codex Quick Path
@@ -20,10 +20,13 @@ Produce an evidence-backed repository state report and cleanup risk map. Report 
 Prefer the bundled evidence collector from the repository root:
 
 ```bash
-python3 ~/.agents/skills/git-state-audit/scripts/git_state_audit.py .
+skill_dir="<absolute path to this skill directory>"
+python3 "$skill_dir/scripts/git_state_audit.py" .
 ```
 
-The helper runs the standard evidence commands, redacts token-like values, summarizes dirty state, branch tracking, stash/worktree counts, shallow status, conditional branch checks, and skips optional checks with explicit reasons. It runs `git fetch --all --prune --tags` by default and only runs `git pull --ff-only` when the Rules allow it. If a GitHub fetch/pull fails with an auth or visibility error and `gh auth status` shows the remote owner is already logged in, the helper switches to that account once and retries. Use `--no-fetch`, `--no-safe-pull`, or `--no-gh-auth-switch` when the user explicitly wants to disable those automated steps.
+The helper runs the standard local evidence commands, redacts token-like values, summarizes dirty state, branch tracking, stash/worktree counts, shallow status, conditional branch checks, and skips optional checks with explicit reasons.
+
+Only when the user explicitly asks to synchronize remote evidence, add `--fetch`. Add `--safe-pull` only when the user explicitly asks to update a clean local `main` and the helper's safety predicate passes. Add `--gh-auth-switch` only after separate explicit approval to switch accounts.
 
 Do not paste the whole helper output into the final answer unless the user asks for raw evidence. Use it to produce the concise report in the Output Format below. If the helper fails or is unavailable, fall back to the manual Evidence Commands.
 
@@ -32,7 +35,6 @@ Do not paste the whole helper output into the final answer unless the user asks 
 Run from the repository root. Parallelize independent reads when useful, but keep command evidence attributable.
 
 ```bash
-git fetch --all --prune --tags 2>&1
 git status -sb
 git status -uall --porcelain
 git branch -vv
@@ -49,8 +51,9 @@ git rev-parse --is-shallow-repository
 Conditional commands:
 
 ```bash
-git pull --ff-only 2>&1  # only when allowed by Rules
-gh auth status 2>&1      # only after auth/visibility failure
+git fetch --all --prune --tags 2>&1  # only after an explicit sync request
+git pull --ff-only 2>&1               # only after an explicit update request and when allowed by Rules
+gh auth status 2>&1                   # only after auth/visibility failure
 git branch --merged origin/main
 git branch --no-merged origin/main
 git log --oneline origin/main..<branch>

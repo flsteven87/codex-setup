@@ -3,4 +3,4 @@ interface:
   short_description: "Explain one topic visually"
   default_prompt: "Use $narrate to turn this topic into a concise visual brief."
 policy:
-  allow_implicit_invocation: true
+  allow_implicit_invocation: false

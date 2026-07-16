@@ -1,6 +1,6 @@
 ---
 name: narrate
-description: Use when the user wants a plain-language visual brief of one topic, ticket, feature, architecture, pipeline, incident, design decision, or current state; triggers include /narrate, narrate, tldr, 30 秒看懂, 圖解, 白話, 帶我看, 解析, or explain this visually.
+description: Use only when the user explicitly invokes `$narrate` to turn one topic, ticket, feature, architecture, pipeline, incident, decision, or current state into a concise plain-language visual brief.
 ---
 
 # Narrate

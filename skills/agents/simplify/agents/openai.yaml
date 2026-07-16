@@ -1,4 +1,0 @@
-interface:
-  display_name: "Simplify"
-  short_description: "Reduce accidental complexity while preserving behavior"
-  default_prompt: "Use $simplify to inspect this change and identify smaller, safer implementation paths."

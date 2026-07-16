@@ -1,6 +1,6 @@
 ---
 name: catchup
-description: Use when the user says /catchup, $catchup, asks to catch up, resume from prior work, rebuild context after a reset, inspect current work state, or update from git before summarizing what to do next.
+description: Use only when the user explicitly invokes `$catchup` to rebuild working context from repository evidence after an interruption, reset, or stale session.
 ---
 
 # Catchup

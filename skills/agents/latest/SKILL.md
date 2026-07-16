@@ -1,6 +1,6 @@
 ---
 name: latest
-description: Use when project memory or handoff state may be stale, bloated, or out of sync with git, PRs, tickets, changelog, or sibling repos, and when the current main checkout should be refreshed by safe fast-forward pull; triggers include /latest, latest, 進入最新狀況, 同步最新, 拉到最新, consolidate memory, 清理 memory, memory 太長, or session-start state refresh.
+description: Use only when the user explicitly invokes `$latest` to safely refresh the current main checkout and reconcile established project memory or handoff state with git, PRs, tickets, changelog, and sibling-repository evidence.
 ---
 
 # Latest

@@ -2,11 +2,12 @@ instructions|baseline|AGENTS.md|.codex/AGENTS.md|Portable global working agreeme
 rules|baseline|rules/default.rules|.codex/rules/default.rules|Command escalation and denial policy|None
 catchup|skill|skills/agents/catchup|.agents/skills/catchup|Rebuild context and summarize current work|None
 design-agentic-systems|skill|skills/agents/design-agentic-systems|.agents/skills/design-agentic-systems|Design and review agentic systems|None
-feature-lifecycle|skill|skills/agents/feature-lifecycle|.agents/skills/feature-lifecycle|Run an explicit end-to-end feature workflow|Superpowers plugin
 git-state-audit|skill|skills/agents/git-state-audit|.agents/skills/git-state-audit|Audit repository state and cleanup safety|GitHub CLI for GitHub-aware checks
-handoff|skill|skills/agents/handoff|.agents/skills/handoff|Prepare concise continuity notes|None
+graphify|skill|skills/agents/graphify|.agents/skills/graphify|Maintain persistent Graphify knowledge graphs|Graphify CLI
 housekeeping|skill|skills/agents/housekeeping|.agents/skills/housekeeping|Audit and tidy Codex artifacts|None
 latest|skill|skills/agents/latest|.agents/skills/latest|Refresh repository and handoff context safely|Git remotes for synchronization
+linear|skill|skills/agents/linear|.agents/skills/linear|Manage Linear work through its connected MCP|Linear MCP
 narrate|skill|skills/agents/narrate|.agents/skills/narrate|Create a plain-language visual brief|Visualization capability for rendered output
-ship|skill|skills/agents/ship|.agents/skills/ship|Verify and deliver a completed change|Superpowers plugin and repository delivery tools
-simplify|skill|skills/agents/simplify|.agents/skills/simplify|Reduce accidental complexity|None
+playwright|skill|skills/agents/playwright|.agents/skills/playwright|Automate a real browser from the terminal|Node.js and npm
+sentry|skill|skills/agents/sentry|.agents/skills/sentry|Inspect Sentry production data read-only|Sentry CLI and authentication
+ship|skill|skills/agents/ship|.agents/skills/ship|Deliver a reviewed commit after Matt's implement skill|GitHub CLI and repository delivery tools

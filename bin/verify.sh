@@ -22,6 +22,10 @@ bash tests/test_content.sh >/dev/null
 bash tests/test_readme.sh >/dev/null
 bash tests/test_setup.sh >/dev/null 2>&1
 uv run python -m unittest tests/test_config.py
+(
+  cd skills/agents/git-state-audit/scripts
+  uv run python -m unittest test_git_state_audit.py
+)
 
 if [ "${CODEX_SETUP_SKIP_UPDATE_TEST:-0}" != "1" ]; then
   bash tests/test_update_all.sh >/dev/null

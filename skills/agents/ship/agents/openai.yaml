@@ -1,6 +1,6 @@
 interface:
   display_name: "Ship"
-  short_description: "Review, deliver, merge, and deploy changes"
-  default_prompt: "Use $ship to take the completed change through its full delivery path, including merge and deployment when applicable."
+  short_description: "Deliver reviewed commits through merge and deploy"
+  default_prompt: "Use $ship after $implement to deliver the reviewed commit through push, merge, deployment, and verification."
 policy:
-  allow_implicit_invocation: true
+  allow_implicit_invocation: false

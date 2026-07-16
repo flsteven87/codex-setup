@@ -3,4 +3,4 @@ interface:
   short_description: "Refresh repo and project memory"
   default_prompt: "Use $latest to fast-forward main safely and sync project memory with current repo and ticket state."
 policy:
-  allow_implicit_invocation: true
+  allow_implicit_invocation: false

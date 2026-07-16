@@ -1,23 +1,22 @@
 # Codex Setup
 
-A small, reviewable reference setup for [OpenAI Codex](https://developers.openai.com/codex/). It provides portable global instructions, command safety rules, opt-in skills, and installation guidance without mirroring live Codex state.
+A small, reviewable reference setup for [OpenAI Codex](https://developers.openai.com/codex/). It combines a portable global baseline, Matt Pocock's upstream engineering skills, and a deliberately small set of personal skills without mirroring live Codex state.
 
 > **Review before installing.** This repository intentionally excludes credentials, OAuth state, sessions, plugin caches, live configuration, and machine-specific paths. The installer never overwrites an existing file or foreign symlink.
 
-Last verified: **2026-07-15** with **Codex CLI 0.144.4**.
+Last verified: **2026-07-16** with **Codex CLI 0.144.4**, **skills CLI 1.5.17**, and Matt Pocock's skills at commit [`e9fcdf9`](https://github.com/mattpocock/skills/commit/e9fcdf95b402d360f90f1db8d776d5dd450f9234).
 
 ## Who this is for
 
-Use this repository if you want a baseline you can read, fork, and customize rather than a preconfigured opinionated environment.
+Use this repository if you want a clean Codex setup with three clear ownership layers:
 
-It includes:
+1. Codex owns its built-in system skills and plugins.
+2. [Matt Pocock's upstream package](https://github.com/mattpocock/skills) owns the general engineering workflow and remains unmodified.
+3. This repository owns only portable instructions, safety rules, and eleven focused personal skills.
 
-- a two-file portable baseline installed by default;
-- ten hand-authored, cross-repository skills installed only when named;
-- a configuration example that is never copied automatically; and
-- guidance for capabilities that should remain owned by plugins or MCP providers.
+The default installer creates only two baseline links. Personal skills are opt-in, and Matt's package is installed from its upstream repository rather than copied here.
 
-It does not include product-specific workflows, account authorization, repository configuration, or third-party plugin code. Keep those in the owning repository, provider, or marketplace.
+Retired orchestration frameworks, replacement handoff implementations, and overlapping cleanup workflows are intentionally absent. Product-specific instructions and repository integrations belong in the repository that owns them.
 
 ## Prerequisites
 
@@ -25,15 +24,16 @@ The installer supports **macOS** and **Linux** with Bash. On Windows, use **WSL*
 
 Install these before running setup:
 
-- [Codex CLI](https://developers.openai.com/codex/cli/) and a working sign-in;
-- Git; and
-- [ripgrep](https://github.com/BurntSushi/ripgrep) (`rg`).
+- [Codex CLI](https://developers.openai.com/codex/cli/) with a working sign-in;
+- Git;
+- [ripgrep](https://github.com/BurntSushi/ripgrep) (`rg`); and
+- Node.js with `npx` when installing Matt Pocock's skills.
 
-The full repository verification command also requires `uv` and `jq`. Optional skills may have additional dependencies shown in the catalog.
+The full repository verification command also requires `uv` and `jq`. Optional personal skills may have additional dependencies shown in the catalog.
 
 ## Preview-first quick start
 
-Clone the repository into a stable location because installed components are symlinks back to this checkout:
+Clone the repository into a stable location because installed baseline and personal components are symlinks back to this checkout:
 
 ```bash
 git clone https://github.com/flsteven87/codex-setup.git ~/.codex-setup
@@ -60,42 +60,85 @@ This links:
 - `AGENTS.md` to `~/.codex/AGENTS.md`; and
 - `rules/default.rules` to `~/.codex/rules/default.rules`.
 
-It does not edit `~/.codex/config.toml`, authentication, MCP, or plugin state.
+It does not edit `~/.codex/config.toml`, authentication, MCP, plugin state, or third-party skills.
 
-To install portable skills, name each one explicitly and reuse the same selection for checks or removal:
+To install personal skills, name each one explicitly and reuse the same selection for checks or removal:
 
 ```bash
-bash setup.sh --dry-run --skill catchup --skill simplify
-bash setup.sh --skill catchup --skill simplify
-bash setup.sh --check --skill catchup --skill simplify
+bash setup.sh --dry-run --skill catchup --skill ship
+bash setup.sh --skill catchup --skill ship
+bash setup.sh --check --skill catchup --skill ship
 ```
 
-If any target already exists and is not the exact managed symlink, setup fails before changing anything. Review the existing target and merge or relocate it yourself; setup will not rename or replace it.
+If a target already exists and is not the exact managed symlink, setup fails before changing anything. Review the existing target and merge or relocate it yourself; setup will not rename or replace it.
+
+## Matt Pocock's engineering skills
+
+Matt's package is an upstream dependency, not a fork in this repository. Install it with the author's recommended [`skills`](https://skills.sh/) workflow:
+
+```bash
+npx skills@latest add mattpocock/skills
+```
+
+Choose the global Codex installation and select the 22 core skills listed in [`config/matt-pocock-skills.txt`](config/matt-pocock-skills.txt), including `setup-matt-pocock-skills`. For a non-interactive installation of exactly that reviewed set from the current upstream branch:
+
+```bash
+rg -v '^(#|$)' config/matt-pocock-skills.txt \
+  | xargs npx --yes skills@latest add mattpocock/skills \
+      --global --agent codex --yes --skill
+```
+
+Do not substitute `--all` if you want this setup's reviewed scope. The upstream repository currently exposes additional general-purpose directories beyond the 22 core skills.
+
+The catalog records the upstream commit used for this verification. The installer still reads the current upstream branch, so review upstream changes before reinstalling or updating:
+
+```bash
+git ls-remote https://github.com/mattpocock/skills.git HEAD
+npx skills@latest update --global
+```
+
+Keep Matt's installed files unmodified. Run `$setup-matt-pocock-skills` once in each repository so the package can record its issue tracker, triage labels, and domain-document layout.
+
+### Recommended workflow
+
+Use the skills compositionally rather than treating them as one autonomous framework:
+
+```text
+$grill-with-docs → $to-spec → $to-tickets → fresh $implement per ticket → $ship
+```
+
+- `$implement` owns the spec or ticket, TDD, source changes, local validation, `$code-review`, and the final reviewed local commit.
+- `$ship` starts from that reviewed commit and owns push, pull-request checks and feedback, merge, deployment, and post-deploy verification.
+- Material product, architecture, security, or scope changes discovered during delivery return to `$implement`; `$ship` may make only a small, clearly bounded delivery fix.
+- Matt's `$handoff` creates continuity notes. Personal `$catchup` is its read-only counterpart for rebuilding current context from repository evidence.
 
 ## Portable skill catalog
 
-The component registry at [`config/components.tsv`](config/components.tsv) is the installer's source of truth.
+The component registry at [`config/components.tsv`](config/components.tsv) is the local installer's source of truth.
 
-| Component | Default | Purpose | Additional dependency |
-|---|---:|---|---|
-| `instructions` | Yes | Portable global working agreements | None |
-| `rules` | Yes | Command escalation and denial policy | None |
-| `catchup` | No | Rebuild context and summarize current work | None |
-| `design-agentic-systems` | No | Design and review agentic systems | None |
-| `feature-lifecycle` | No | Run an explicit end-to-end feature workflow | Superpowers plugin |
-| `git-state-audit` | No | Audit repository state and cleanup safety | GitHub CLI for GitHub-aware checks |
-| `handoff` | No | Prepare concise continuity notes | None |
-| `housekeeping` | No | Audit and tidy Codex artifacts | None |
-| `latest` | No | Refresh repository and handoff context safely | Git remotes for synchronization |
-| `narrate` | No | Create a plain-language visual brief | Visualization capability for rendered output |
-| `ship` | No | Verify and deliver a completed change | Superpowers plugin and repository delivery tools |
-| `simplify` | No | Reduce accidental complexity | None |
+| Component | Default | Invocation | Purpose | Additional dependency |
+|---|---:|---|---|---|
+| `instructions` | Yes | Automatic | Portable global working agreements | None |
+| `rules` | Yes | Automatic | Command escalation and denial policy | None |
+| `catchup` | No | Explicit only | Rebuild context from repository evidence | None |
+| `design-agentic-systems` | No | Task matched | Design and review agentic systems | None |
+| `git-state-audit` | No | Explicit only | Produce a read-only git state and cleanup-risk report | GitHub CLI for GitHub-aware checks |
+| `graphify` | No | Explicit only | Query and maintain persistent knowledge graphs | Graphify CLI |
+| `housekeeping` | No | Task matched | Audit and tidy Codex artifacts | None |
+| `latest` | No | Explicit only | Fast-forward main and reconcile established project memory | Git remotes for synchronization |
+| `linear` | No | Task matched | Manage Linear work through its current MCP schema | Linear MCP |
+| `narrate` | No | Explicit only | Create a concise plain-language visual brief | Visualization capability |
+| `playwright` | No | Task matched | Automate a real browser from the terminal | Node.js and npm |
+| `sentry` | No | Task matched | Inspect production errors read-only | Sentry CLI and authentication |
+| `ship` | No | Explicit only | Deliver a reviewed commit after `$implement` | GitHub CLI and repository delivery tools |
 
-Skills are linked to `~/.agents/skills/<name>`, the supported user-level location. Codex discovers symlinked skills automatically; restart an open Codex task if a newly installed skill does not appear.
+`$catchup` and `$latest` are intentionally different. Use `$catchup` for a fast, read-only status rebuild. Use `$latest` when the active main checkout and persistent project memory must be synchronized with remotes, pull requests, tickets, changelogs, or sibling repositories.
+
+Personal skills are linked to `~/.agents/skills/<name>`, the supported user-level location. Restart an open Codex task if a newly installed skill does not appear.
 
 ## Update
 
-Update this reference checkout separately from Codex and its plugins:
+Update this reference checkout separately from Codex, Matt's skills, and plugins:
 
 ```bash
 cd ~/.codex-setup
@@ -103,22 +146,22 @@ git pull --ff-only
 bash setup.sh --check
 ```
 
-Because links point into the checkout, a successful pull updates installed baseline files and selected skills immediately.
+Because links point into the checkout, a successful pull updates the installed baseline and selected personal skills immediately.
 
-The following command is optional and changes your installed Codex CLI, Git marketplace snapshots, and currently enabled third-party plugins:
+The following command is optional and changes the installed Codex CLI, Git marketplace snapshots, and currently enabled third-party plugins:
 
 ```bash
 bash bin/update-all.sh
 ```
 
-It leaves disabled plugins disabled and finishes with source checks plus `codex doctor`.
+It leaves disabled plugins disabled and finishes with source checks plus `codex doctor`. Update Matt's package separately so its upstream diff can be reviewed on its own.
 
 ## Uninstall
 
-Remove the baseline and the same selected skills:
+Remove the baseline and the same selected personal skills:
 
 ```bash
-bash setup.sh --uninstall --skill catchup --skill simplify
+bash setup.sh --uninstall --skill catchup --skill ship
 ```
 
 To remove only the default baseline:
@@ -127,56 +170,25 @@ To remove only the default baseline:
 bash setup.sh --uninstall
 ```
 
-Uninstall removes only symlinks that point to the corresponding source in this checkout. Real files, directories, foreign symlinks, live config, authentication, and plugin state are left untouched.
+Uninstall removes only symlinks that point to the corresponding source in this checkout. Real files, directories, foreign symlinks, Matt's package, live config, authentication, and plugin state are left untouched.
 
 ## Plugins and marketplaces
 
-Plugins are optional. Install them from their maintained marketplace instead of copying their code into this repository.
+Plugins are optional and remain managed by Codex. Install them from their maintained marketplace rather than copying their code into this repository.
 
-### Superpowers
-
-- **Provides:** structured design, planning, debugging, TDD, review, and delivery workflows.
-- **Use when:** you want a more explicit engineering process or install the `feature-lifecycle` and `ship` skills from this repository.
-- **Trust boundary:** plugin instructions can influence how Codex plans and executes repository work; review its source and marketplace before enabling it.
-
-Install and verify:
+Inspect the current inventory before changing it:
 
 ```bash
-codex plugin marketplace add obra/superpowers-marketplace
-codex plugin add superpowers@superpowers-marketplace
 codex plugin list
-```
-
-Remove it when no installed skill depends on it:
-
-```bash
-codex plugin remove superpowers@superpowers-marketplace
-```
-
-### Paper desktop design tools
-
-- **Provides:** Paper design-to-code and code-to-design workflows.
-- **Use when:** Paper is part of your design workflow; it is unnecessary for general coding.
-- **Trust boundary:** the plugin can read project context and create or edit design assets through Paper's tools.
-
-Install and verify:
-
-```bash
-codex plugin marketplace add paper-design/agent-plugins
-codex plugin add paper-desktop@paper
-codex plugin list
-```
-
-Remove:
-
-```bash
-codex plugin remove paper-desktop@paper
-```
-
-List configured marketplace names before removing an unused marketplace source:
-
-```bash
 codex plugin marketplace list
+```
+
+Remove an unused third-party plugin or marketplace only after confirming that no active skill depends on it:
+
+```bash
+plugin_id="replace-with-plugin-id"
+codex plugin remove "$plugin_id"
+
 marketplace_name="replace-with-marketplace-name"
 codex plugin marketplace remove "$marketplace_name"
 ```
@@ -187,7 +199,7 @@ OpenAI-bundled and primary-runtime plugins are managed by Codex. Install remote 
 
 Use global MCP only for capabilities useful across repositories. Put repository-specific servers in that trusted repository's `.codex/config.toml` and do not document them here.
 
-[`config/config.example.toml`](config/config.example.toml) is a reference, not an install target. Copy only the sections you understand into your live config.
+[`config/config.example.toml`](config/config.example.toml) is a reference, not an install target. Copy only the sections you understand into live config.
 
 Prefer OAuth or environment-backed credentials over literal tokens:
 
@@ -228,24 +240,26 @@ Run `bash bin/verify.sh` when you also want `codex doctor` to validate the activ
 ## Compatibility
 
 - Installer: macOS and Linux Bash; WSL is the Windows path.
-- Last verified: Codex CLI 0.144.4 on 2026-07-15.
+- Last verified: Codex CLI 0.144.4 and skills CLI 1.5.17 on 2026-07-16.
+- Matt core catalog: 22 unmodified upstream skills verified at `e9fcdf95b402d360f90f1db8d776d5dd450f9234`.
 - Model selection is intentionally unset so Codex can use the account's current default.
 - Marketplace and MCP commands are guidance, not pinned copies; review provider changes before updating commands or compatibility pins.
 
 ## Repository layout
 
 ```text
-AGENTS.md                  Portable personal defaults
-config/components.tsv      Installable component registry
-config/config.example.toml Reviewed configuration examples
-rules/default.rules        Command safety policy
-skills/agents/             Portable opt-in skills
-scripts/check-secrets.sh   Public-repository secret scanner
-setup.sh                   Previewable, conflict-safe installer
-bin/update-all.sh          Optional CLI and plugin refresh
-bin/verify.sh              Source and environment verification
+AGENTS.md                       Portable personal defaults
+config/components.tsv           Installable local component registry
+config/matt-pocock-skills.txt   Reviewed Matt core catalog and upstream commit
+config/config.example.toml      Reviewed configuration examples
+rules/default.rules             Command safety policy
+skills/agents/                  Portable opt-in personal skills
+scripts/check-secrets.sh        Public-repository secret scanner
+setup.sh                        Previewable, conflict-safe local installer
+bin/update-all.sh               Optional CLI and plugin refresh
+bin/verify.sh                   Source and environment verification
 ```
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE). Vendored personal skills that include their own license or notice retain those files in their directories.

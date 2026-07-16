@@ -34,10 +34,10 @@ test ! -e "$DEFAULT_HOME/.agents/skills"
 test ! -e "$DEFAULT_HOME/.codex/config.toml"
 
 SELECTED_HOME="$TMP/selected"
-run_setup "$SELECTED_HOME" --skill ship --skill simplify
-run_setup "$SELECTED_HOME" --check --skill ship --skill simplify
+run_setup "$SELECTED_HOME" --skill ship --skill graphify
+run_setup "$SELECTED_HOME" --check --skill ship --skill graphify
 test -L "$SELECTED_HOME/.agents/skills/ship"
-test -L "$SELECTED_HOME/.agents/skills/simplify"
+test -L "$SELECTED_HOME/.agents/skills/graphify"
 test ! -e "$SELECTED_HOME/.agents/skills/catchup"
 
 UNKNOWN_HOME="$TMP/unknown"

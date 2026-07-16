@@ -4,6 +4,19 @@ import git_state_audit as audit
 
 
 class GitStateAuditTests(unittest.TestCase):
+    def test_cli_side_effects_are_opt_in(self):
+        defaults = audit.build_parser().parse_args([])
+        self.assertFalse(defaults.fetch)
+        self.assertFalse(defaults.safe_pull)
+        self.assertFalse(defaults.gh_auth_switch)
+
+        enabled = audit.build_parser().parse_args(
+            ["--fetch", "--safe-pull", "--gh-auth-switch"]
+        )
+        self.assertTrue(enabled.fetch)
+        self.assertTrue(enabled.safe_pull)
+        self.assertTrue(enabled.gh_auth_switch)
+
     def test_summarizes_porcelain_counts(self):
         summary = audit.summarize_porcelain(
             [

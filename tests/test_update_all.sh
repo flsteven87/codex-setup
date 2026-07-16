@@ -22,14 +22,14 @@ case "$*" in
   "plugin list --json")
     cat <<'JSON'
 {"installed":[
-  {"pluginId":"superpowers@superpowers-marketplace","enabled":true,"marketplaceSource":{"sourceType":"git"}},
+  {"pluginId":"enabled-example@example-marketplace","enabled":true,"marketplaceSource":{"sourceType":"git"}},
   {"pluginId":"disabled-example@example-marketplace","enabled":false,"marketplaceSource":{"sourceType":"git"}},
   {"pluginId":"browser@openai-bundled","enabled":true,"marketplaceSource":{"sourceType":"local"}}
 ]}
 JSON
     ;;
-  "plugin add superpowers@superpowers-marketplace --json")
-    printf '%s\n' '{"pluginId":"superpowers@superpowers-marketplace"}'
+  "plugin add enabled-example@example-marketplace --json")
+    printf '%s\n' '{"pluginId":"enabled-example@example-marketplace"}'
     ;;
   "doctor --json")
     printf '%s\n' '{"overallStatus":"ok"}'
@@ -47,7 +47,7 @@ CODEX_BIN="$FAKE_CODEX" CODEX_TEST_LOG="$LOG" bash "$ROOT/bin/update-all.sh"
 rg -Fxq 'update' "$LOG"
 rg -Fxq 'plugin marketplace upgrade --json' "$LOG"
 rg -Fxq 'plugin list --json' "$LOG"
-rg -Fxq 'plugin add superpowers@superpowers-marketplace --json' "$LOG"
+rg -Fxq 'plugin add enabled-example@example-marketplace --json' "$LOG"
 rg -Fxq 'doctor --json' "$LOG"
 
 if rg -q 'plugin add disabled-example@example-marketplace' "$LOG"; then

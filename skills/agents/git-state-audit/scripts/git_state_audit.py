@@ -179,7 +179,7 @@ def retry_after_github_auth_switch(
     if result.exit_code == 0 or not is_github_auth_failure(result.output):
         return [result]
     if not enabled:
-        decisions.append(f"GitHub auth switch skipped by --no-gh-auth-switch after {result.name} failed")
+        decisions.append(f"GitHub auth switch not enabled after {result.name} failed")
         return [result]
     if shutil.which("gh") is None:
         decisions.append(f"GitHub auth switch skipped because gh is unavailable after {result.name} failed")
@@ -403,7 +403,7 @@ def collect_audit(
         results.extend(fetch_results)
         decisions.append(f"fetch final exit={fetch_results[-1].exit_code}")
     else:
-        decisions.append("fetch skipped by --no-fetch")
+        decisions.append("fetch skipped; pass --fetch only after an explicit sync request")
 
     branch = git_output(["branch", "--show-current"], cwd=repo_root)
     upstream = git_output(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}"], cwd=repo_root)
@@ -437,7 +437,7 @@ def collect_audit(
             f"clean={clean}, ahead={ahead}, behind={behind})"
         )
     else:
-        decisions.append("safe pull skipped by --no-safe-pull")
+        decisions.append("safe pull skipped; pass --safe-pull only after an explicit update request")
 
     command_specs = [
         ("git status -sb", ["status", "-sb"]),
@@ -524,21 +524,25 @@ def collect_audit(
     }
 
 
-def main() -> int:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Collect git state audit evidence safely.")
     parser.add_argument("path", nargs="?", default=os.getcwd(), help="Repository path or subdirectory.")
-    parser.add_argument("--no-fetch", action="store_true", help="Skip git fetch --all --prune --tags.")
-    parser.add_argument("--no-safe-pull", action="store_true", help="Skip conditional git pull --ff-only.")
-    parser.add_argument("--no-gh-auth-switch", action="store_true", help="Do not switch GitHub CLI accounts after auth failures.")
+    parser.add_argument("--fetch", action="store_true", help="Run git fetch --all --prune --tags after an explicit sync request.")
+    parser.add_argument("--safe-pull", action="store_true", help="Allow conditional git pull --ff-only after an explicit update request.")
+    parser.add_argument("--gh-auth-switch", action="store_true", help="Allow one GitHub CLI account switch after separate explicit approval.")
     parser.add_argument("--edge-checks", action="store_true", help="Run slower recovery-oriented edge checks.")
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON instead of Markdown.")
-    args = parser.parse_args()
+    return parser
+
+
+def main() -> int:
+    args = build_parser().parse_args()
 
     audit = collect_audit(
         Path(args.path).resolve(),
-        fetch=not args.no_fetch,
-        safe_pull=not args.no_safe_pull,
-        gh_auth_switch=not args.no_gh_auth_switch,
+        fetch=args.fetch,
+        safe_pull=args.safe_pull,
+        gh_auth_switch=args.gh_auth_switch,
         edge_checks=args.edge_checks,
     )
     if args.json:

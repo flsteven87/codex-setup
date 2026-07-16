@@ -71,7 +71,7 @@ print_file_status() {
     age=$(mtime_days "$path")
     printf '  %s: %s lines, %sKB, %sd old, %s\n' "$label" "$lines" "$kb" "$age" "$path"
     if (( lines > 220 )); then
-      printf '    WARN: large instruction file; consider splitting or moving repeatable workflows into skills.\n'
+      printf '    WARN: large agent-facing file; review it for stale or duplicated configuration.\n'
     fi
   else
     printf '  %s: not found\n' "$label"

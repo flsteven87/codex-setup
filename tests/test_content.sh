@@ -9,14 +9,24 @@ test -f "$ROOT/rules/default.rules"
 AGENT_SKILLS=(
   catchup
   design-agentic-systems
-  feature-lifecycle
   git-state-audit
-  handoff
+  graphify
   housekeeping
+  latest
+  linear
+  narrate
+  playwright
+  sentry
+  ship
+)
+
+EXPLICIT_ONLY_SKILLS=(
+  catchup
+  git-state-audit
+  graphify
   latest
   narrate
   ship
-  simplify
 )
 
 check_skill() {
@@ -32,8 +42,28 @@ for name in "${AGENT_SKILLS[@]}"; do
   check_skill "$ROOT/skills/agents/$name/SKILL.md"
 done
 
+for name in "${EXPLICIT_ONLY_SKILLS[@]}"; do
+  rg -q '^policy:$' "$ROOT/skills/agents/$name/agents/openai.yaml"
+  rg -q '^  allow_implicit_invocation: false$' "$ROOT/skills/agents/$name/agents/openai.yaml"
+done
+
 test "$(find "$ROOT/skills/agents" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')" = "${#AGENT_SKILLS[@]}"
 test ! -d "$ROOT/skills/codex"
+test -x "$ROOT/skills/agents/git-state-audit/scripts/git_state_audit.py"
+test -x "$ROOT/skills/agents/housekeeping/scripts/scan.sh"
+test -x "$ROOT/skills/agents/playwright/scripts/playwright_cli.sh"
+
+MATT_SKILLS=()
+while IFS= read -r name; do
+  case "$name" in
+    ''|'#'*) continue ;;
+  esac
+  MATT_SKILLS+=("$name")
+done <"$ROOT/config/matt-pocock-skills.txt"
+
+test "${#MATT_SKILLS[@]}" = 22
+printf '%s\n' "${MATT_SKILLS[@]}" | rg -qx 'setup-matt-pocock-skills'
+test "$(printf '%s\n' "${MATT_SKILLS[@]}" | sort -u | wc -l | tr -d ' ')" = 22
 
 REGISTRY_SKILLS=()
 while IFS='|' read -r id kind _rest; do
