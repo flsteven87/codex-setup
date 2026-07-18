@@ -1,6 +1,6 @@
 interface:
   display_name: "Git State Audit"
-  short_description: "Collect and audit git state before cleanup"
-  default_prompt: "Use $git-state-audit to collect repository evidence and recommend git cleanup actions by risk."
+  short_description: "Read-only map of Git state and cleanup risk"
+  default_prompt: "Use $git-state-audit to collect read-only repository evidence and map Git state, recovery concerns, and cleanup risk."
 policy:
   allow_implicit_invocation: false

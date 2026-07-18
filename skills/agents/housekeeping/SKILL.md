@@ -49,6 +49,20 @@ For Codex-specific alignment, prefer these destinations:
 - Repo rules: `<repo>/AGENTS.md` or nearer `AGENTS.override.md`.
 - Session continuity: the repo's existing handoff surface, or chat output if none exists.
 
+### Git handoff
+
+Keep Git state outside housekeeping's implementation:
+
+1. If cleanup may involve a branch, stash, or worktree, stop housekeeping and
+   ask the user to explicitly invoke `$git-state-audit` for a read-only risk
+   report.
+2. If that audit proves specific local branches or worktrees safe to remove,
+   recommend `$git-cleanup` as a separate, user-invoked follow-up. Let its own
+   confirmation gates govern deletion.
+3. Do not send stashes, remote branches, remote PRs, reflog recovery, or
+   repository maintenance to `$git-cleanup`; report them as separate work that
+   needs explicit scope and approval.
+
 ## Phase 3: Execute After Approval
 
 Before any destructive edit:
@@ -107,4 +121,5 @@ Stop and ask before proceeding if:
 - A memory item may encode a business decision not present elsewhere.
 - A file contains secret-like values.
 - A `git status` shows unrelated user changes in files you would modify.
-- The requested cleanup overlaps with branch, stash, or worktree deletion. Use `$git-state-audit` first.
+- The requested cleanup overlaps with branch, stash, or worktree deletion. Use
+  the Git handoff above; do not invoke either Git skill automatically.

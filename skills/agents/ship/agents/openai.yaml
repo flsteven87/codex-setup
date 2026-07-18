@@ -1,6 +1,6 @@
 interface:
   display_name: "Ship"
-  short_description: "Deliver reviewed commits through merge and deploy"
-  default_prompt: "Use $ship after $implement to deliver the reviewed commit through push, merge, deployment, and verification."
+  short_description: "Deliver, merge, deploy, and finalize local work"
+  default_prompt: "Use $ship after $implement to deliver the reviewed commit through push, merge, deployment, verification, and safe task-scoped local finalization."
 policy:
   allow_implicit_invocation: false

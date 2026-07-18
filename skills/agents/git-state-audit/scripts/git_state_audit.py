@@ -19,11 +19,6 @@ TOKEN_RE = re.compile(
     r"glpat-[A-Za-z0-9_-]{10,}|xox[baprs]-[A-Za-z0-9-]{10,}|"
     r"sk-[A-Za-z0-9]{20,})"
 )
-GITHUB_OWNER_RES = [
-    re.compile(r"^https://github\.com/([^/\s]+)/[^/\s]+/?$"),
-    re.compile(r"^git@github\.com:([^/\s]+)/[^/\s]+/?$"),
-    re.compile(r"^ssh://git@github\.com/([^/\s]+)/[^/\s]+/?$"),
-]
 
 
 @dataclass(frozen=True)
@@ -50,44 +45,6 @@ def redact(text: str) -> str:
     return TOKEN_RE.sub("<redacted-token>", text)
 
 
-def github_owner_from_remote(remote_url: str) -> str | None:
-    normalized = remote_url.strip()
-    if normalized.endswith(".git"):
-        normalized = normalized[:-4]
-    for pattern in GITHUB_OWNER_RES:
-        match = pattern.match(normalized)
-        if match:
-            return match.group(1)
-    return None
-
-
-def is_github_auth_failure(output: str) -> bool:
-    lowered = output.lower()
-    markers = [
-        "repository not found",
-        "authentication failed",
-        "could not read username",
-        "permission denied",
-    ]
-    return any(marker in lowered for marker in markers)
-
-
-def parse_gh_auth_accounts(output: str) -> tuple[set[str], str | None]:
-    accounts: set[str] = set()
-    active: str | None = None
-    current: str | None = None
-
-    for line in output.splitlines():
-        account_match = re.search(r"account ([^\s(]+)", line)
-        if account_match:
-            current = account_match.group(1)
-            accounts.add(current)
-        if "Active account: true" in line and current:
-            active = current
-
-    return accounts, active
-
-
 def summarize_porcelain(lines: Iterable[str]) -> PorcelainSummary:
     staged = 0
     unstaged = 0
@@ -110,23 +67,6 @@ def summarize_porcelain(lines: Iterable[str]) -> PorcelainSummary:
     return PorcelainSummary(staged=staged, unstaged=unstaged, untracked=untracked)
 
 
-def is_safe_pull_candidate(
-    *,
-    branch: str,
-    upstream: str,
-    clean: bool,
-    ahead: int,
-    behind: int,
-) -> bool:
-    return (
-        branch == "main"
-        and upstream == "origin/main"
-        and clean
-        and ahead == 0
-        and behind > 0
-    )
-
-
 def run_command(
     args: list[str],
     *,
@@ -143,6 +83,7 @@ def run_command(
             stderr=subprocess.STDOUT,
             timeout=timeout,
             check=False,
+            env={**os.environ, "GIT_OPTIONAL_LOCKS": "0", "LC_ALL": "C"},
         )
         output = completed.stdout or ""
         exit_code = completed.returncode
@@ -158,7 +99,9 @@ def run_command(
     )
 
 
-def git(args: list[str], *, cwd: Path, name: str | None = None, timeout: int = 120) -> CommandResult:
+def git(
+    args: list[str], *, cwd: Path, name: str | None = None, timeout: int = 120
+) -> CommandResult:
     return run_command(["git", *args], cwd=cwd, name=name, timeout=timeout)
 
 
@@ -169,75 +112,12 @@ def git_output(args: list[str], *, cwd: Path) -> str:
     return result.output.strip()
 
 
-def retry_after_github_auth_switch(
-    result: CommandResult,
-    *,
-    cwd: Path,
-    decisions: list[str],
-    enabled: bool,
-) -> list[CommandResult]:
-    if result.exit_code == 0 or not is_github_auth_failure(result.output):
-        return [result]
-    if not enabled:
-        decisions.append(f"GitHub auth switch not enabled after {result.name} failed")
-        return [result]
-    if shutil.which("gh") is None:
-        decisions.append(f"GitHub auth switch skipped because gh is unavailable after {result.name} failed")
-        return [result]
-
-    remote_url = git_output(["remote", "get-url", "origin"], cwd=cwd)
-    owner = github_owner_from_remote(remote_url)
-    if not owner:
-        decisions.append(f"GitHub auth switch skipped because origin is not a github.com remote after {result.name} failed")
-        return [result]
-
-    status_result = run_command(["gh", "auth", "status"], cwd=cwd, name="gh auth status")
-    accounts, active = parse_gh_auth_accounts(status_result.output)
-    retry_results = [result, status_result]
-    if owner not in accounts:
-        decisions.append(f"GitHub auth switch skipped because account {owner} is not logged in")
-        return retry_results
-    if active == owner:
-        decisions.append(f"GitHub auth switch skipped because {owner} is already active")
-        return retry_results
-
-    switch_result = run_command(
-        ["gh", "auth", "switch", "--hostname", "github.com", "--user", owner],
-        cwd=cwd,
-        name=f"gh auth switch --hostname github.com --user {owner}",
-    )
-    retry_results.append(switch_result)
-    if switch_result.exit_code != 0:
-        decisions.append(f"GitHub auth switch to {owner} failed; {result.name} was not retried")
-        return retry_results
-
-    retry_result = run_command(result.command, cwd=cwd, name=f"{result.name} (retry after gh auth switch)")
-    retry_results.append(retry_result)
-    decisions.append(
-        f"GitHub auth switched to {owner} after {result.name} failed; retry exit={retry_result.exit_code}"
-    )
-    return retry_results
-
-
 def resolve_repo_root(cwd: Path) -> Path:
     result = git(["rev-parse", "--show-toplevel"], cwd=cwd)
     if result.exit_code != 0 or not result.output.strip():
         print("Not a git repository.", file=sys.stderr)
         raise SystemExit(2)
     return Path(result.output.strip())
-
-
-def parse_ahead_behind(cwd: Path) -> tuple[int, int]:
-    result = git(["rev-list", "--left-right", "--count", "HEAD...@{upstream}"], cwd=cwd)
-    if result.exit_code != 0:
-        return (0, 0)
-    parts = result.output.split()
-    if len(parts) < 2:
-        return (0, 0)
-    try:
-        return (int(parts[0]), int(parts[1]))
-    except ValueError:
-        return (0, 0)
 
 
 def branch_track_counts(ref_output: str) -> dict[str, int]:
@@ -262,7 +142,9 @@ def branch_track_counts(ref_output: str) -> dict[str, int]:
 
 
 def count_remote_branches(cwd: Path) -> int:
-    refs = git_output(["for-each-ref", "--format=%(refname:short)", "refs/remotes"], cwd=cwd)
+    refs = git_output(
+        ["for-each-ref", "--format=%(refname:short)", "refs/remotes"], cwd=cwd
+    )
     return len(
         [
             line
@@ -291,7 +173,10 @@ def oldest_stash(stash_output: str) -> str:
     lines = [line for line in stash_output.splitlines() if line.strip()]
     if not lines:
         return "none"
-    return lines[-1].split(":", 1)[0]
+    label, separator, _subject = lines[-1].partition("}: ")
+    if not separator or not label.startswith("stash@{"):
+        return lines[-1]
+    return label.removeprefix("stash@{")
 
 
 def command_block(result: CommandResult) -> str:
@@ -334,7 +219,9 @@ def build_summary(
         "working_tree_counts": asdict(status),
         "branches": branch_counts,
         "remote_branch_count": remote_count,
-        "stash_count": len([line for line in stash_output.splitlines() if line.strip()]),
+        "stash_count": len(
+            [line for line in stash_output.splitlines() if line.strip()]
+        ),
         "oldest_stash": oldest_stash(stash_output),
         "worktrees": worktrees,
         "remotes": remote_lines,
@@ -342,10 +229,16 @@ def build_summary(
     }
 
 
-def render_markdown(summary: dict[str, object], decisions: list[str], results: list[CommandResult]) -> str:
+def render_markdown(
+    summary: dict[str, object], decisions: list[str], results: list[CommandResult]
+) -> str:
     branches = summary["branches"]
     worktrees = summary["worktrees"]
-    worktree_notes = ", ".join(worktrees["notes"]) if worktrees["notes"] else "no locked/prunable notes"
+    worktree_notes = (
+        ", ".join(worktrees["notes"])
+        if worktrees["notes"]
+        else "no locked/prunable notes"
+    )
     remotes = summary["remotes"] or ["none"]
 
     lines = [
@@ -384,8 +277,6 @@ def collect_audit(
     cwd: Path,
     *,
     fetch: bool,
-    safe_pull: bool,
-    gh_auth_switch: bool,
     edge_checks: bool,
 ) -> dict[str, object]:
     repo_root = resolve_repo_root(cwd)
@@ -393,51 +284,19 @@ def collect_audit(
     decisions: list[str] = []
 
     if fetch:
-        fetch_result = git(["fetch", "--all", "--prune", "--tags"], cwd=repo_root, name="git fetch --all --prune --tags")
-        fetch_results = retry_after_github_auth_switch(
-            fetch_result,
+        fetch_result = git(
+            ["fetch", "--all", "--prune", "--tags"],
             cwd=repo_root,
-            decisions=decisions,
-            enabled=gh_auth_switch,
+            name="git fetch --all --prune --tags",
         )
-        results.extend(fetch_results)
-        decisions.append(f"fetch final exit={fetch_results[-1].exit_code}")
-    else:
-        decisions.append("fetch skipped; pass --fetch only after an explicit sync request")
-
-    branch = git_output(["branch", "--show-current"], cwd=repo_root)
-    upstream = git_output(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}"], cwd=repo_root)
-    porcelain_now = git_output(["status", "-uall", "--porcelain"], cwd=repo_root)
-    ahead, behind = parse_ahead_behind(repo_root)
-    clean = summarize_porcelain(porcelain_now.splitlines()).clean
-
-    if safe_pull and is_safe_pull_candidate(
-        branch=branch,
-        upstream=upstream,
-        clean=clean,
-        ahead=ahead,
-        behind=behind,
-    ):
-        pull_result = git(["pull", "--ff-only"], cwd=repo_root, name="git pull --ff-only")
-        pull_results = retry_after_github_auth_switch(
-            pull_result,
-            cwd=repo_root,
-            decisions=decisions,
-            enabled=gh_auth_switch,
-        )
-        results.extend(pull_results)
+        results.append(fetch_result)
         decisions.append(
-            "safe pull ran because clean local main was behind origin/main; "
-            f"final exit={pull_results[-1].exit_code}"
-        )
-    elif safe_pull:
-        decisions.append(
-            "safe pull skipped "
-            f"(branch={branch or 'DETACHED'}, upstream={upstream or 'none'}, "
-            f"clean={clean}, ahead={ahead}, behind={behind})"
+            f"explicit remote evidence refresh exit={fetch_result.exit_code}"
         )
     else:
-        decisions.append("safe pull skipped; pass --safe-pull only after an explicit update request")
+        decisions.append(
+            "fetch skipped; pass --fetch only after an explicit sync request"
+        )
 
     command_specs = [
         ("git status -sb", ["status", "-sb"]),
@@ -447,46 +306,86 @@ def collect_audit(
         ("git remote -v", ["remote", "-v"]),
         ("git stash list --date=iso", ["stash", "list", "--date=iso"]),
         ("git worktree list --porcelain", ["worktree", "list", "--porcelain"]),
-        ("git log --oneline --all --graph --decorate -30", ["log", "--oneline", "--all", "--graph", "--decorate", "-30"]),
+        (
+            "git log --oneline --all --graph --decorate -30",
+            ["log", "--oneline", "--all", "--graph", "--decorate", "-30"],
+        ),
         ("git reflog --date=iso", ["reflog", "--date=iso"]),
         (
             "git for-each-ref refs/heads",
-            ["for-each-ref", "--format=%(refname:short)\t%(upstream:track)\t%(committerdate:iso)", "refs/heads"],
+            [
+                "for-each-ref",
+                "--format=%(refname:short)\t%(upstream:track)\t%(committerdate:iso)",
+                "refs/heads",
+            ],
         ),
-        ("git rev-parse --is-shallow-repository", ["rev-parse", "--is-shallow-repository"]),
+        (
+            "git rev-parse --is-shallow-repository",
+            ["rev-parse", "--is-shallow-repository"],
+        ),
     ]
 
     if origin_main_exists(repo_root):
         command_specs.extend(
             [
-                ("git branch --merged origin/main", ["branch", "--merged", "origin/main"]),
-                ("git branch --no-merged origin/main", ["branch", "--no-merged", "origin/main"]),
+                (
+                    "git branch --merged origin/main",
+                    ["branch", "--merged", "origin/main"],
+                ),
+                (
+                    "git branch --no-merged origin/main",
+                    ["branch", "--no-merged", "origin/main"],
+                ),
             ]
         )
     else:
-        decisions.append("origin/main conditional branch checks skipped because origin/main is unavailable")
+        decisions.append(
+            "origin/main conditional branch checks skipped because origin/main is unavailable"
+        )
 
     if (repo_root / ".gitmodules").exists():
-        command_specs.append(("git submodule status --recursive", ["submodule", "status", "--recursive"]))
+        command_specs.append(
+            ("git submodule status --recursive", ["submodule", "status", "--recursive"])
+        )
     else:
         decisions.append("submodule check skipped because .gitmodules is absent")
 
     gitattributes = repo_root / ".gitattributes"
-    if gitattributes.exists() and "filter=lfs" in gitattributes.read_text(errors="replace"):
-        if shutil.which("git-lfs") or shutil.which("git-lfs.exe") or "lfs" in git(["lfs", "version"], cwd=repo_root).output:
+    if gitattributes.exists() and "filter=lfs" in gitattributes.read_text(
+        errors="replace"
+    ):
+        if (
+            shutil.which("git-lfs")
+            or shutil.which("git-lfs.exe")
+            or "lfs" in git(["lfs", "version"], cwd=repo_root).output
+        ):
             command_specs.append(("git lfs status", ["lfs", "status"]))
         else:
             decisions.append("git lfs status skipped because git-lfs is unavailable")
     else:
-        decisions.append("LFS check skipped because .gitattributes has no filter=lfs entry")
+        decisions.append(
+            "LFS check skipped because .gitattributes has no filter=lfs entry"
+        )
 
     if edge_checks:
-        command_specs.append(("git fsck --no-reflogs --lost-found", ["fsck", "--no-reflogs", "--lost-found"]))
+        command_specs.append(
+            (
+                "git fsck --no-reflogs --unreachable --no-progress",
+                ["fsck", "--no-reflogs", "--unreachable", "--no-progress"],
+            )
+        )
     else:
-        decisions.append("git fsck edge check skipped by default; pass --edge-checks when recovery analysis needs it")
+        decisions.append(
+            "git fsck edge check skipped by default; pass --edge-checks when recovery analysis needs it"
+        )
 
     for name, args in command_specs:
-        result = git(args, cwd=repo_root, name=name, timeout=180 if args and args[0] == "fsck" else 120)
+        result = git(
+            args,
+            cwd=repo_root,
+            name=name,
+            timeout=180 if args and args[0] == "fsck" else 120,
+        )
         if name == "git reflog --date=iso":
             result = CommandResult(
                 name=result.name,
@@ -494,7 +393,7 @@ def collect_audit(
                 exit_code=result.exit_code,
                 output="\n".join(result.output.splitlines()[:40]),
             )
-        if name == "git fsck --no-reflogs --lost-found":
+        if name == "git fsck --no-reflogs --unreachable --no-progress":
             result = CommandResult(
                 name=result.name,
                 command=result.command,
@@ -525,13 +424,27 @@ def collect_audit(
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Collect git state audit evidence safely.")
-    parser.add_argument("path", nargs="?", default=os.getcwd(), help="Repository path or subdirectory.")
-    parser.add_argument("--fetch", action="store_true", help="Run git fetch --all --prune --tags after an explicit sync request.")
-    parser.add_argument("--safe-pull", action="store_true", help="Allow conditional git pull --ff-only after an explicit update request.")
-    parser.add_argument("--gh-auth-switch", action="store_true", help="Allow one GitHub CLI account switch after separate explicit approval.")
-    parser.add_argument("--edge-checks", action="store_true", help="Run slower recovery-oriented edge checks.")
-    parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON instead of Markdown.")
+    parser = argparse.ArgumentParser(
+        description="Collect git state audit evidence safely."
+    )
+    parser.add_argument(
+        "path", nargs="?", default=os.getcwd(), help="Repository path or subdirectory."
+    )
+    parser.add_argument(
+        "--fetch",
+        action="store_true",
+        help="Run git fetch --all --prune --tags after an explicit sync request.",
+    )
+    parser.add_argument(
+        "--edge-checks",
+        action="store_true",
+        help="Run slower recovery-oriented edge checks.",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit machine-readable JSON instead of Markdown.",
+    )
     return parser
 
 
@@ -541,8 +454,6 @@ def main() -> int:
     audit = collect_audit(
         Path(args.path).resolve(),
         fetch=args.fetch,
-        safe_pull=args.safe_pull,
-        gh_auth_switch=args.gh_auth_switch,
         edge_checks=args.edge_checks,
     )
     if args.json:

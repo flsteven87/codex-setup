@@ -1,6 +1,6 @@
 ---
 name: git-state-audit
-description: Use only when the user explicitly invokes `$git-state-audit` to collect read-only repository evidence and produce a git-state and cleanup-risk report.
+description: Use only when the user explicitly invokes `$git-state-audit` to collect read-only repository evidence and produce a broad git-state, recovery, and cleanup-risk report. This skill never delivers work, pulls updates, switches accounts, or deletes Git state; route proven local branch/worktree cleanup to `$git-cleanup`.
 ---
 
 # Git State Audit
@@ -10,9 +10,12 @@ Produce an evidence-backed repository state report and cleanup risk map. Report 
 ## Rules
 
 - Final user-facing audit report MUST be in Traditional Chinese unless the user explicitly requests another language.
-- Default to read-only local evidence. The helper must not fetch, pull, or switch GitHub accounts unless the user explicitly requested that specific update.
+- Default to read-only local evidence. Run `git fetch` only when the user explicitly requests a
+  remote evidence refresh; fetching updates remote-tracking refs but does not authorize any other
+  mutation.
 - Never stage, commit, push, edit files, delete branches/stashes/worktrees, reset, run `git clean` or `git worktree prune`, force-push, or otherwise mutate repository state during the audit.
-- Never switch GitHub accounts without explicit approval after reporting the active account and intended target account. Redact token-like values.
+- Never pull, switch branches, switch GitHub accounts, or retry through a different identity. Report
+  authentication or visibility failures as limitations. Redact token-like values.
 - If the audit supports cleanup/housekeeping, complete this audit before recommending any deletion.
 
 ## Codex Quick Path
@@ -26,7 +29,8 @@ python3 "$skill_dir/scripts/git_state_audit.py" .
 
 The helper runs the standard local evidence commands, redacts token-like values, summarizes dirty state, branch tracking, stash/worktree counts, shallow status, conditional branch checks, and skips optional checks with explicit reasons.
 
-Only when the user explicitly asks to synchronize remote evidence, add `--fetch`. Add `--safe-pull` only when the user explicitly asks to update a clean local `main` and the helper's safety predicate passes. Add `--gh-auth-switch` only after separate explicit approval to switch accounts.
+Only when the user explicitly asks to synchronize remote evidence, add `--fetch`. A request to update
+the local default branch or change GitHub identity is a separate action outside this skill.
 
 Do not paste the whole helper output into the final answer unless the user asks for raw evidence. Use it to produce the concise report in the Output Format below. If the helper fails or is unavailable, fall back to the manual Evidence Commands.
 
@@ -52,8 +56,6 @@ Conditional commands:
 
 ```bash
 git fetch --all --prune --tags 2>&1  # only after an explicit sync request
-git pull --ff-only 2>&1               # only after an explicit update request and when allowed by Rules
-gh auth status 2>&1                   # only after auth/visibility failure
 git branch --merged origin/main
 git branch --no-merged origin/main
 git log --oneline origin/main..<branch>
@@ -67,7 +69,7 @@ git diff <mergeCommit>^..<mergeCommit> | git patch-id --stable
 Optional edge checks, when relevant:
 
 ```bash
-git fsck --no-reflogs --lost-found 2>&1 | head -20
+git fsck --no-reflogs --unreachable --no-progress 2>&1 | head -20
 git submodule status --recursive
 test -f .gitattributes && rg -n 'filter=lfs|diff=lfs|merge=lfs' .gitattributes
 git lfs status
@@ -81,7 +83,7 @@ Skip optional commands that are clearly irrelevant or unavailable, and state wha
 - Branches: merged, ahead, behind, diverged, no upstream, `[gone]`, local-only work.
 - Stash: count, age, branch context, whether it may be the only copy.
 - Worktrees: dirty, locked, missing, orphaned, clean merged branches.
-- Remote sync: stale refs, unpushed commits/tags, remote-only branches, shared-branch risk.
+- Remote evidence: freshness limits, unpushed commits/tags, remote-only branches, shared-branch risk.
 - Recovery: reflog-only commits, dangling commits newer than 7 days, detached HEAD-only commits.
 
 ## Output Format
@@ -123,6 +125,13 @@ Keep the final report concise and in Traditional Chinese. Preserve command names
 - Classify untracked files before cleanup: artifact, local config, generated output, or in-progress work.
 - For detached HEAD, list commits reachable only from HEAD before suggesting any branch switch.
 - Redact token-like values in URLs or command output.
+- When the audit identifies user-approved Safe local branch or worktree cleanup,
+  recommend an explicit `$git-cleanup` follow-up. Do not invoke it automatically.
+- Do not repeat `$git-cleanup`'s complete branch grouping and deletion plan. Identify candidates and
+  risks; let `$git-cleanup` collect fresh deletion evidence at its own approval gates.
+- Do not hand off stashes, remote branches, remote PRs, reflog-only commits,
+  dangling commits, or repository maintenance to `$git-cleanup`; keep those in
+  this report as separate follow-up work requiring explicit scope and approval.
 
 ## Safety Stops
 

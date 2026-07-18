@@ -4,6 +4,15 @@
 approval_policy = "on-request"
 sandbox_mode = "danger-full-access"
 check_for_update_on_startup = true
+web_search = "live"
+
+[features]
+hooks = true
+goals = true
+
+[agents]
+max_threads = 6
+max_depth = 1
 
 [shell_environment_policy]
 inherit = "core"
@@ -13,11 +22,11 @@ ignore_default_excludes = false
 [mcp_servers.openaiDeveloperDocs]
 url = "https://developers.openai.com/mcp"
 
-# Current library documentation. The unpinned npm tag follows the package's
-# supported release channel; use an exact version when reproducibility matters.
+# Current library documentation. Keep the reviewed package version pinned so a
+# new upstream release cannot change the executable MCP surface unexpectedly.
 [mcp_servers.context7]
 command = "npx"
-args = ["-y", "@upstash/context7-mcp"]
+args = ["-y", "@upstash/context7-mcp@3.2.3"]
 
 # OAuth-backed issue tracking. Authenticate with: codex mcp login linear
 [mcp_servers.linear]
