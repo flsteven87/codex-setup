@@ -1,6 +1,6 @@
 interface:
   display_name: "Graphify"
-  short_description: "Query and maintain Graphify knowledge graphs"
-  default_prompt: "Use $graphify to inspect the nearest active graph for this repository relationship question."
+  short_description: "Query code graphs before broad source exploration"
+  default_prompt: "Use $graphify to narrow this architecture or impact question with an existing graph, then verify the relevant source."
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true

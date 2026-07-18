@@ -20,9 +20,19 @@ class ConfigExampleTests(unittest.TestCase):
         self.assertEqual(self.config["approval_policy"], "on-request")
         self.assertEqual(self.config["sandbox_mode"], "danger-full-access")
 
+    def test_enables_reviewed_agent_workflow_features(self) -> None:
+        self.assertEqual(self.config["web_search"], "live")
+        self.assertEqual(self.config["features"], {"hooks": True, "goals": True})
+        self.assertEqual(self.config["agents"], {"max_threads": 6, "max_depth": 1})
+
+    def test_pins_executable_mcp_packages(self) -> None:
+        context7 = self.config["mcp_servers"]["context7"]
+        self.assertEqual(context7["args"], ["-y", "@upstash/context7-mcp@3.2.3"])
+
     def test_contains_no_project_or_literal_authorization_state(self) -> None:
         self.assertNotIn("projects", self.config)
         self.assertNotIn("authorization", self.text.lower())
+        self.assertNotIn("js_repl", self.config.get("features", {}))
 
     def test_serena_is_codex_aware_and_disabled_by_default(self) -> None:
         serena = self.config["mcp_servers"]["serena"]

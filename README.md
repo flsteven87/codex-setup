@@ -4,7 +4,7 @@ A small, reviewable reference setup for [OpenAI Codex](https://developers.openai
 
 > **Review before installing.** This repository intentionally excludes credentials, OAuth state, sessions, plugin caches, live configuration, and machine-specific paths. The installer never overwrites an existing file or foreign symlink.
 
-Last verified: **2026-07-16** with **Codex CLI 0.144.4**, **skills CLI 1.5.17**, and Matt Pocock's skills at commit [`e9fcdf9`](https://github.com/mattpocock/skills/commit/e9fcdf95b402d360f90f1db8d776d5dd450f9234).
+Last verified: **2026-07-18** with **Codex CLI 0.144.4**, **skills CLI 1.5.17**, and Matt Pocock's skills at commit [`e9fcdf9`](https://github.com/mattpocock/skills/commit/e9fcdf95b402d360f90f1db8d776d5dd450f9234).
 
 ## Who this is for
 
@@ -123,10 +123,10 @@ The component registry at [`config/components.tsv`](config/components.tsv) is th
 |---|---:|---|---|---|
 | `instructions` | Yes | Automatic | Portable global working agreements | None |
 | `rules` | Yes | Automatic | Command escalation and denial policy | None |
-| `catchup` | No | Explicit only | Rebuild context from repository evidence | None |
+| `catchup` | No | Explicit only | Reconcile a handoff with current repository evidence | None |
 | `design-agentic-systems` | No | Task matched | Design and review agentic systems | None |
 | `git-state-audit` | No | Explicit only | Produce a read-only git state and cleanup-risk report | GitHub CLI for GitHub-aware checks |
-| `graphify` | No | Explicit only | Query and maintain persistent knowledge graphs | Graphify CLI |
+| `graphify` | No | Task matched | Narrow broad code questions with existing graphs | Graphify CLI |
 | `housekeeping` | No | Task matched | Audit and tidy Codex artifacts | None |
 | `latest` | No | Explicit only | Fast-forward main and reconcile established project memory | Git remotes for synchronization |
 | `linear` | No | Task matched | Manage Linear work through its current MCP schema | Linear MCP |

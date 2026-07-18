@@ -29,7 +29,6 @@ AGENT_SKILLS=(
 EXPLICIT_ONLY_SKILLS=(
   catchup
   git-state-audit
-  graphify
   latest
   narrate
   ship
@@ -56,8 +55,10 @@ done
 test "$(find "$ROOT/skills/agents" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')" = "${#AGENT_SKILLS[@]}"
 test ! -d "$ROOT/skills/codex"
 test -x "$ROOT/skills/agents/git-state-audit/scripts/git_state_audit.py"
+test -f "$ROOT/skills/agents/graphify/scripts/discover_graphs.py"
 test -x "$ROOT/skills/agents/housekeeping/scripts/scan.sh"
 test -x "$ROOT/skills/agents/playwright/scripts/playwright_cli.sh"
+test -f "$ROOT/skills/agents/ship/scripts/finalize_local_delivery.py"
 
 MATT_SKILLS=()
 while IFS= read -r name; do
