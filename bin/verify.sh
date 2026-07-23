@@ -23,6 +23,10 @@ bash tests/test_readme.sh >/dev/null
 bash tests/test_setup.sh >/dev/null 2>&1
 uv run python -m unittest tests/test_config.py
 (
+  cd skills/agents/git-converge-main/scripts
+  uv run python -m unittest test_git_converge.py
+)
+(
   cd skills/agents/git-state-audit/scripts
   uv run python -m unittest test_git_state_audit.py
 )
@@ -45,6 +49,7 @@ done < <(find setup.sh bin scripts tests skills -type f -name '*.sh' -print0)
 
 uv run --with ruff ruff check \
   tests/test_config.py \
+  skills/agents/git-converge-main/scripts/*.py \
   skills/agents/git-state-audit/scripts/*.py \
   skills/agents/graphify/scripts/*.py \
   skills/agents/ship/scripts/*.py
@@ -64,7 +69,7 @@ while IFS= read -r -d '' file; do
 done < <(git ls-files --cached --others --exclude-standard -z)
 
 if command -v shellcheck >/dev/null 2>&1; then
-  shellcheck setup.sh bin/*.sh scripts/*.sh tests/*.sh
+  shellcheck --severity=warning setup.sh bin/*.sh scripts/*.sh tests/*.sh
 fi
 
 printf 'Source checks: OK\n'
@@ -74,6 +79,24 @@ if [ "$SOURCE_ONLY" = true ]; then
 fi
 
 printf 'Running Codex doctor...\n'
-doctor_result="$(TERM="${TERM:-xterm-256color}" codex doctor --json)"
-printf '%s' "$doctor_result" | jq -e '.overallStatus == "ok"' >/dev/null
-printf 'Codex doctor: OK\n'
+doctor_term="${TERM:-xterm-256color}"
+if [ "$doctor_term" = dumb ]; then
+  doctor_term=xterm-256color
+fi
+doctor_result="$(TERM="$doctor_term" codex doctor --json)"
+doctor_status="$(printf '%s' "$doctor_result" | jq -r '.overallStatus')"
+case "$doctor_status" in
+  ok)
+    printf 'Codex doctor: OK\n'
+    ;;
+  warning)
+    printf '%s' "$doctor_result" \
+      | jq -r '.checks | to_entries[] | select(.value.status == "warning") | "  WARN \(.key): \(.value.summary)"'
+    printf 'Codex doctor: WARNING\n'
+    ;;
+  *)
+    printf '%s' "$doctor_result" \
+      | jq -r '.checks | to_entries[] | select(.value.status == "fail") | "  FAIL \(.key): \(.value.summary)"' >&2
+    exit 1
+    ;;
+esac

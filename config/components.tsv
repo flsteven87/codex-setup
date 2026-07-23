@@ -1,8 +1,11 @@
 instructions|baseline|AGENTS.md|.codex/AGENTS.md|Portable global working agreements|None
 rules|baseline|rules/default.rules|.codex/rules/default.rules|Command escalation and denial policy|None
 explorer-agent|baseline|agents/explorer.toml|.codex/agents/explorer.toml|Efficient read-heavy exploration agent|None
+axi-routing|skill|skills/agents/axi-routing|.agents/skills/axi-routing|Choose one efficient tool surface for each operation|AXI CLIs for optional AXI routes
 catchup|skill|skills/agents/catchup|.agents/skills/catchup|Reconcile a handoff with current repository evidence|None
 design-agentic-systems|skill|skills/agents/design-agentic-systems|.agents/skills/design-agentic-systems|Design and review agentic systems|None
+fugu-advisor|skill|skills/agents/fugu-advisor|.agents/skills/fugu-advisor|Consult Fugu Ultra for an independent second opinion|Configured Fugu Ultra custom agent
+git-converge-main|skill|skills/agents/git-converge-main|.agents/skills/git-converge-main|Converge owned Git state into a clean current main|GitHub CLI for PR and remote checks
 git-state-audit|skill|skills/agents/git-state-audit|.agents/skills/git-state-audit|Audit repository state and cleanup safety|GitHub CLI for GitHub-aware checks
 graphify|skill|skills/agents/graphify|.agents/skills/graphify|Narrow broad code questions with existing graphs|Graphify CLI
 housekeeping|skill|skills/agents/housekeeping|.agents/skills/housekeeping|Audit and tidy Codex artifacts|None

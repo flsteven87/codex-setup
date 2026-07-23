@@ -13,8 +13,11 @@ rg -q '^model_reasoning_effort = "high"$' "$ROOT/agents/explorer.toml"
 ! rg -q '^sandbox_mode' "$ROOT/agents/explorer.toml"
 
 AGENT_SKILLS=(
+  axi-routing
   catchup
   design-agentic-systems
+  fugu-advisor
+  git-converge-main
   git-state-audit
   graphify
   housekeeping
@@ -28,6 +31,7 @@ AGENT_SKILLS=(
 
 EXPLICIT_ONLY_SKILLS=(
   catchup
+  fugu-advisor
   git-state-audit
   latest
   narrate
@@ -54,6 +58,7 @@ done
 
 test "$(find "$ROOT/skills/agents" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')" = "${#AGENT_SKILLS[@]}"
 test ! -d "$ROOT/skills/codex"
+test -f "$ROOT/skills/agents/git-converge-main/scripts/git_converge.py"
 test -x "$ROOT/skills/agents/git-state-audit/scripts/git_state_audit.py"
 test -f "$ROOT/skills/agents/graphify/scripts/discover_graphs.py"
 test -x "$ROOT/skills/agents/housekeeping/scripts/scan.sh"

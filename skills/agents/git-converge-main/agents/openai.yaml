@@ -1,0 +1,4 @@
+interface:
+  display_name: "Git Main Convergence"
+  short_description: "Converge only your and Codex-owned Git work"
+  default_prompt: "Use $git-converge-main to reconcile my and Codex-created branches, worktrees, stashes, and PRs into a clean current main."

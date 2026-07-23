@@ -1,6 +1,6 @@
 ---
 name: narrate
-description: Use only when the user explicitly invokes `$narrate` to turn one topic, ticket, feature, architecture, pipeline, incident, decision, or current state into a concise plain-language visual brief.
+description: Turn one technical or product topic into a concise plain-language visual brief.
 ---
 
 # Narrate
@@ -16,7 +16,7 @@ Always produce these blocks in this order:
 3. **Key Nodes**: a markdown table with `節點 | 白話職責 | 位置`. This table is the only place for paths, APIs, flags, ticket IDs, or function names. Verify every path before listing it.
 4. **Gaps**: up to 3 honest blockers, ambiguities, or follow-ups. If none, write one line: `無缺口`.
 
-Then stop. Do not add a generic summary or option menu. If one next action is obvious, close with a single recommendation line.
+End after these blocks. Add one recommendation line only when the evidence supports an obvious next action.
 
 ## Diagram Grammar
 
@@ -34,19 +34,6 @@ Default to a light pass:
 
 - If the topic names a ticket or PR, verify current state with available tools before asserting status.
 - If a path enters the Key Nodes table, confirm it exists with `rg --files` or a direct file read.
-- If the repo has Graphify guidance and the topic is architectural, prefer the nearest fresh graph report before broad search.
 - If evidence conflicts, put the conflict in Gaps without dramatizing it.
 
 Escalate to a deeper walkthrough only when the user explicitly asks for full coverage, onboarding, or a complete architecture explanation. Even then, start with the four-block brief.
-
-## Language
-
-Use the user's language. For Traditional Chinese requests, write zh-tw prose while keeping technical identifiers in English.
-
-## Common Mistakes
-
-- Putting code names on the diagram. Put them in the table instead.
-- Repeating the diagram in prose. Diagram shows structure; text explains why it matters.
-- Offering 2-3 narrative options at the end. Recommend one next action or stop.
-- Filling all 9 boxes just because the cap allows it.
-- Listing unverified paths.

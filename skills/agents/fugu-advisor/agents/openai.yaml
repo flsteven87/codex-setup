@@ -1,0 +1,7 @@
+interface:
+  display_name: "Fugu Advisor"
+  short_description: "Consult Fugu Ultra for a second opinion"
+  default_prompt: "Use $fugu-advisor to consult Fugu Ultra on the current topic and reconcile its assessment with your own."
+
+policy:
+  allow_implicit_invocation: false

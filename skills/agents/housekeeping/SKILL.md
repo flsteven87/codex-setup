@@ -1,6 +1,6 @@
 ---
 name: housekeeping
-description: Audit and safely tidy Codex agent artifacts, including AGENTS.md guidance, .agents skills, .codex config and handoffs, completed plans, stale notes, and context hygiene issues. Use when the user says housekeeping, clean up, tidy, context hygiene, reset accumulated cruft, 整理, 清理, or before/after a major project phase.
+description: Audit and tidy Codex agent artifacts, including AGENTS.md, skills, .codex config, handoffs, completed plans, stale notes, and context hygiene. Use for explicit housekeeping or accumulated agent-artifact cleanup.
 ---
 
 # Housekeeping
@@ -12,9 +12,7 @@ Keep agent-facing context lean, current, and discoverable without touching produ
 - Report first, modify only after explicit user approval.
 - Prefer durable rules in `AGENTS.md`, repeatable workflows in `.agents/skills`, external integrations in MCP/config, and recurring schedules in automations.
 - Keep housekeeping Codex-native. Do not read or write legacy agent surfaces unless the user explicitly asks for a migration audit.
-- Do not create documentation files unless the user explicitly approves a target and purpose.
 - Never delete, rewrite, or consolidate source code as part of housekeeping.
-- Match the user's language for reports. When the user writes Chinese, report in Traditional Chinese.
 
 ## Phase 1: Scan
 
@@ -36,10 +34,10 @@ Present the scan results before proposing changes. If the script is unavailable,
 
 Group findings by risk:
 
-- Safe to delete: completed plan files or completed scratch notes with no pending markers.
+- Deletion candidates: completed plan files or scratch notes with no pending markers. This label is evidence for review, not authorization to delete.
 - Consolidate: overlapping memory or handoff notes, oversized `AGENTS.md` sections that should become a skill or referenced guide, duplicate or conflicting Codex workflow instructions.
 - Needs user review: empty files, generated temp notes, stale but possibly meaningful project memory, old handoff state, disabled skill configs, abandoned branch/worktree notes, conflicting instructions.
-- Do not touch: source code, tests, migrations, lockfiles, active specs, secrets, local env files, or repo docs unrelated to agent workflow.
+- Out of scope: source code, tests, migrations, lockfiles, active specs, secrets, local env files, and repo docs unrelated to agent workflow.
 
 For Codex-specific alignment, prefer these destinations:
 
@@ -53,15 +51,9 @@ For Codex-specific alignment, prefer these destinations:
 
 Keep Git state outside housekeeping's implementation:
 
-1. If cleanup may involve a branch, stash, or worktree, stop housekeeping and
-   ask the user to explicitly invoke `$git-state-audit` for a read-only risk
-   report.
-2. If that audit proves specific local branches or worktrees safe to remove,
-   recommend `$git-cleanup` as a separate, user-invoked follow-up. Let its own
-   confirmation gates govern deletion.
-3. Do not send stashes, remote branches, remote PRs, reflog recovery, or
-   repository maintenance to `$git-cleanup`; report them as separate work that
-   needs explicit scope and approval.
+If cleanup reaches a branch, stash, worktree, remote PR/ref, reflog recovery, or repository
+maintenance item, stop at the exact overlap and recommend explicit `$git-converge-main` invocation.
+That skill owns classification, proof, authorization, and mutation.
 
 ## Phase 3: Execute After Approval
 
@@ -85,41 +77,23 @@ Cleanup rules:
 
 ## Phase 4: Report
 
-End in the user's language. When reporting in Chinese, use Traditional Chinese and translate the fixed labels instead of leaving the final block in English.
+Report counts for deleted files and freed size, consolidations, trims and removed lines, updated
+files, skipped items, and validation. For an audit-only run, report the scan and recommendations
+and state that no files changed.
 
-English template:
+## Completion
 
-```text
-Housekeeping Complete
-Deleted:      <count> files (<size> freed)
-Consolidated: <before> files -> <after> files
-Trimmed:      <count> files (<lines> lines removed)
-Updated:      <files>
-Skipped:      <items declined or deferred>
-Validation:   <commands run or not run>
-```
-
-Traditional Chinese template:
-
-```text
-Housekeeping 完成
-已刪除:      <count> 個檔案（釋放 <size>）
-已整併:      <before> 個檔案 -> <after> 個檔案
-已精簡:      <count> 個檔案（移除 <lines> 行）
-已更新:      <files>
-已略過:      <items declined or deferred>
-驗證:        <commands run or not run>
-```
-
-If no changes were made, report the scan, recommendations, and that no files were modified.
+| Branch | Complete when |
+|---|---|
+| Audit only | The scan scope, evidence-backed candidates, review-required items, and untouched surfaces are reported; no files changed. |
+| Approved cleanup | Every touched file was named in the approval, unrelated content was preserved, and the final counts plus validation are reported. |
+| Consolidation | The destination owns the surviving rule, the removed copies add no unique constraint, and the before/after summary is reported. |
+| Git overlap | Housekeeping stops with the exact overlap and recommends explicit `$git-converge-main` invocation; it does not classify the Git item itself. |
 
 ## Safety Stops
 
 Stop and ask before proceeding if:
 
-- A cleanup item touches product source code or test files.
 - A memory item may encode a business decision not present elsewhere.
 - A file contains secret-like values.
 - A `git status` shows unrelated user changes in files you would modify.
-- The requested cleanup overlaps with branch, stash, or worktree deletion. Use
-  the Git handoff above; do not invoke either Git skill automatically.

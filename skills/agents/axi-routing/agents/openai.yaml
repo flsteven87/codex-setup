@@ -1,0 +1,4 @@
+interface:
+  display_name: "AXI Tool Routing"
+  short_description: "Choose the most efficient native or AXI tool"
+  default_prompt: "Use $axi-routing to choose and apply the most efficient agent-facing tool for this task."

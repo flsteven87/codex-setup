@@ -123,8 +123,11 @@ The component registry at [`config/components.tsv`](config/components.tsv) is th
 |---|---:|---|---|---|
 | `instructions` | Yes | Automatic | Portable global working agreements | None |
 | `rules` | Yes | Automatic | Command escalation and denial policy | None |
+| `axi-routing` | No | Task matched | Choose one efficient tool surface for each operation | AXI CLIs for optional AXI routes |
 | `catchup` | No | Explicit only | Reconcile a handoff with current repository evidence | None |
 | `design-agentic-systems` | No | Task matched | Design and review agentic systems | None |
+| `fugu-advisor` | No | Explicit only | Consult Fugu Ultra for an independent second opinion | Configured Fugu Ultra custom agent |
+| `git-converge-main` | No | Task matched | Converge owned Git state into a clean current main | GitHub CLI for PR and remote checks |
 | `git-state-audit` | No | Explicit only | Produce a read-only git state and cleanup-risk report | GitHub CLI for GitHub-aware checks |
 | `graphify` | No | Task matched | Narrow broad code questions with existing graphs | Graphify CLI |
 | `housekeeping` | No | Task matched | Audit and tidy Codex artifacts | None |

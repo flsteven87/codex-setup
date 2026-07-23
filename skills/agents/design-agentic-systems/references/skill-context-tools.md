@@ -7,6 +7,7 @@ Use this reference when designing prompts, skills, tool contracts, MCP/tool-sear
 - Prompt Altitude
 - Skill Design
 - Context Engineering
+- Context And State Inventory
 - Tool Contracts
 - Tool Loading
 - Structured Outputs
@@ -77,7 +78,26 @@ Separate context types:
 
 - Model context: facts the model must reason over.
 - Runtime context: clients, credentials, database handles, authenticated user info, and private implementation state.
-- Durable state: compact facts needed across turns or resumptions.
+- Session history: conversation and tool events carried across turns.
+- Durable workflow state: routing, approval, attempt, checkpoint, and resume facts.
+- Artifact store: versioned handles to files and large results.
+- Long-term memory: curated facts or preferences that survive beyond one workflow.
+
+## Context And State Inventory
+
+For each context, state, artifact, or memory class, define:
+
+- owner and source of truth;
+- schema/version and tenant boundary;
+- provenance, trust level, timestamp, freshness, and TTL;
+- read/write authority and validation;
+- compaction, invalidation, correction, deletion, and retention;
+- whether it may enter model context, logs, or serialized run state.
+
+Memory is data, not authority. It may be stale or poisoned and must not silently override current
+user intent, policy, authorization, or an authoritative external source. Preserve a durable,
+recoverable session/event record separately from the model's curated context; evaluate compaction
+and retrieval on long traces.
 
 ## Tool Contracts
 
@@ -90,6 +110,11 @@ Write tools like APIs for a capable but literal caller:
 - Required fields only when genuinely required.
 - Outputs that are concise, typed, and directly useful for the next decision.
 - Error messages that say what failed and what the agent can do next.
+- Caller identity, tenant/resource boundary, and required scopes.
+- Server owner, provenance, trust assumptions, and data classification.
+- Side-effect, reversibility, timeout, retryability, idempotency, deduplication, and concurrency.
+- Pagination, filtering, truncation, and response-size limits.
+- Typed error class, retry hint, and partial-result behavior.
 
 Reduce tool ambiguity:
 
@@ -104,7 +129,8 @@ Make tools hard to misuse:
 - Use IDs instead of names when names are ambiguous.
 - Validate arguments before side effects.
 - Return previews or dry-run results before writes.
-- Require approval for mutating operations.
+- Bind approval to the exact target, arguments, diff or preview, and disclosed data.
+- Enforce authorization in the runtime or server, not in the prompt.
 
 ## Tool Loading
 
@@ -114,6 +140,14 @@ When many tools or MCP servers exist:
 - Use tool search, namespaces, MCP server descriptions, or filesystem-discoverable tool docs.
 - Load full schemas only when the task needs them.
 - For large data transfers, prefer code execution that filters/transforms data before returning concise results to the model.
+- Filter tools by task, actor, tenant, and current authority.
+- Trace catalog and schema versions and treat dynamic tool-list changes as security-relevant.
+- Treat remote tool descriptions and annotations as untrusted hints unless independently verified.
+- Prefer official or otherwise verified servers; sandbox local or executable servers with minimal
+  filesystem, network, credential, and process access.
+
+Programmatic tool calling or code execution is appropriate for bounded deterministic filtering and
+aggregation, but requires resource limits and explicit network/data-egress controls.
 
 ## Structured Outputs
 
@@ -127,3 +161,7 @@ Use structured outputs when downstream code depends on:
 - Eval grading.
 
 Do not parse model prose for critical control flow when a typed object is possible.
+
+Structured output constrains shape; it does not confer trust, authorization, freshness, or factual
+correctness. Validate semantic constraints at every privilege boundary and retain provenance fields
+when downstream policy depends on the source.

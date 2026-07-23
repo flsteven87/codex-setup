@@ -1,32 +1,28 @@
 ---
 name: latest
-description: Use only when the user explicitly invokes `$latest` to safely refresh the current main checkout and reconcile established project memory or handoff state with git, PRs, tickets, changelog, and sibling-repository evidence.
+description: Refresh an established project memory or handoff and the active default checkout against current Git, PR, ticket, changelog, and explicitly relevant repository evidence. Use when durable session-start memory has drifted; unlike catchup, this may fast-forward main and rewrite that surface.
 ---
 
 # Latest
 
-Bring the working context and the current main checkout up to reality before planning or coding. This is heavier than `catchup`: it can fast-forward pull the active main checkout and rewrite an established memory or handoff surface so future sessions start from current truth, not stale notes.
-
-## Use Versus Catchup
-
-- Use `catchup` for a fast, read-only status rebuild.
-- Use `latest` when memory/handoff files have drifted, accumulated old session history, or will guide the next decision.
-- Do not use on brand-new projects with no durable memory surface.
+Bring the current default checkout and its established session-start memory up to verified reality.
 
 ## Principles
 
 - Evidence first: git, PRs, tickets, changelog, repo files, then memory.
 - Focus over completeness: session-start memory should answer "what should I do next?" not serve as a project journal.
 - Autonomy for value-neutral cleanup: trim stale or off-topic memory without asking when evidence is clear.
-- Do not rewrite user-owned decisions silently. If a locked rule or personal preference conflicts with evidence, leave it and report the tension.
+- Preserve user-owned decisions; report conflicts with locked rules or personal preferences as tensions.
 
 ## Workflow
 
 1. Detect scope:
    - repo root and branch
    - established memory or handoff target, if any
-   - sibling repos named by memory or located beside the current repo
+   - sibling repos explicitly named by the user or by a direct pointer in the selected memory whose
+     state affects the current objective
    - ticket prefixes and available ticket/PR tools
+   - scope derives from those explicit names and pointers, not filesystem adjacency
 2. Sync truth:
    - fetch remote refs when safe
    - if the active checkout is `main`, `master`, or `trunk`, safely fast-forward it to its upstream before classifying memory
@@ -43,7 +39,7 @@ Bring the working context and the current main checkout up to reality before pla
    - keep current WIP, immediate next step, recent ships, locked constraints, and routing pointers
    - remove or compress old ship narratives, transient PR lists, closed tickets, dead plans, and stale operational todos
    - move durable but non-immediate detail into an existing topic file when the project already has that convention
-   - avoid creating new documentation files unless the user asked or the memory system already uses topic files
+   - inspect the final diff and verify every edited claim against the evidence used to classify it
 5. Report:
    - what sources were synced
    - what memory changed
@@ -63,25 +59,27 @@ When the active repo checkout is on `main`, `master`, or `trunk`, run a safe ref
 3. Confirm there are no tracked local changes.
 4. Check untracked files for path collisions with incoming upstream files.
 5. If safe, run `git pull --ff-only`.
-6. If not safe, do not pull; report the exact blocker and leave the checkout untouched.
+6. Otherwise leave the checkout untouched and report the exact blocker.
 
 Do not merge, rebase, stash, delete, or overwrite local work as part of `latest`. Do not pull feature branches or sibling repos unless the user explicitly asks; fetch them and report their divergence instead.
 
-## Safety
+## Completion
 
-- Never print secrets.
-- Do not pull or mutate sibling repos beyond fetch unless explicitly asked.
-- Do not modify team-visible ticket state from this skill; propose changes instead.
-- Do not turn `latest` into implementation or cleanup of unrelated code.
+| Branch | Complete when |
+|---|---|
+| Active default branch | It was fast-forwarded, was already current, or was skipped with the exact safety blocker. |
+| Feature branch | Remote refs and divergence were inspected without pulling or rewriting the branch. |
+| Memory reconciliation | Every changed claim has evidence, the final diff was inspected, and user-owned tensions remain visible. |
+| Named sibling evidence | Only the named repository was inspected; any fetch or skipped access is reported. |
+| No established memory | No file is created; the missing target and the read-only status result are reported. |
+
+## Boundaries
+
+- Keep sibling repositories read-only beyond fetch unless explicitly requested.
+- Propose team-visible ticket changes rather than applying them.
+- Keep implementation and unrelated code cleanup outside this workflow.
 
 ## Output Shape
 
-Use the user's language. For zh-tw, use:
-
-- 已同步
-- Memory 編輯
-- 需要你確認的張力
-- 起手就緒
-
-Keep the final "起手就緒" paragraph to 2-3 sentences.
-Always include whether the active checkout was pulled, already current, or skipped with a concrete reason.
+Report synced sources, memory edits, user-owned tensions, and a two-to-three-sentence ready-next
+action. State whether the active checkout was pulled, already current, or skipped and why.

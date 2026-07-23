@@ -1,6 +1,6 @@
 interface:
   display_name: "Catch Up"
-  short_description: "Resume a handoff against current repo evidence"
-  default_prompt: "Use $catchup with a handoff file to reconcile the previous session with current repository state and recommend the safest next action."
+  short_description: "Resume from task provenance or a handoff file"
+  default_prompt: "Use $catchup to recover the preceding Codex handoff or consume an explicit handoff file, reconcile it with current repository evidence, and recommend the safest next action."
 policy:
   allow_implicit_invocation: false
