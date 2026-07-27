@@ -31,10 +31,6 @@ uv run python -m unittest tests/test_config.py
   uv run python -m unittest test_git_state_audit.py
 )
 (
-  cd skills/agents/graphify/scripts
-  uv run python -m unittest test_discover_graphs.py
-)
-(
   cd skills/agents/ship/scripts
   uv run python -m unittest test_finalize_local_delivery.py
 )
@@ -51,7 +47,6 @@ uv run --with ruff ruff check \
   tests/test_config.py \
   skills/agents/git-converge-main/scripts/*.py \
   skills/agents/git-state-audit/scripts/*.py \
-  skills/agents/graphify/scripts/*.py \
   skills/agents/ship/scripts/*.py
 
 codex execpolicy check --pretty --rules rules/default.rules -- git reset --hard HEAD~1 \

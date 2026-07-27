@@ -19,7 +19,7 @@ AGENT_SKILLS=(
   fugu-advisor
   git-converge-main
   git-state-audit
-  graphify
+  handoff
   housekeeping
   latest
   linear
@@ -33,6 +33,7 @@ EXPLICIT_ONLY_SKILLS=(
   catchup
   fugu-advisor
   git-state-audit
+  handoff
   latest
   narrate
   ship
@@ -60,7 +61,6 @@ test "$(find "$ROOT/skills/agents" -mindepth 1 -maxdepth 1 -type d | wc -l | tr 
 test ! -d "$ROOT/skills/codex"
 test -f "$ROOT/skills/agents/git-converge-main/scripts/git_converge.py"
 test -x "$ROOT/skills/agents/git-state-audit/scripts/git_state_audit.py"
-test -f "$ROOT/skills/agents/graphify/scripts/discover_graphs.py"
 test -x "$ROOT/skills/agents/housekeeping/scripts/scan.sh"
 test -x "$ROOT/skills/agents/playwright/scripts/playwright_cli.sh"
 test -f "$ROOT/skills/agents/ship/scripts/finalize_local_delivery.py"
@@ -73,9 +73,10 @@ while IFS= read -r name; do
   MATT_SKILLS+=("$name")
 done <"$ROOT/config/matt-pocock-skills.txt"
 
-test "${#MATT_SKILLS[@]}" = 22
+test "${#MATT_SKILLS[@]}" = 21
 printf '%s\n' "${MATT_SKILLS[@]}" | rg -qx 'setup-matt-pocock-skills'
-test "$(printf '%s\n' "${MATT_SKILLS[@]}" | sort -u | wc -l | tr -d ' ')" = 22
+! printf '%s\n' "${MATT_SKILLS[@]}" | rg -qx 'handoff'
+test "$(printf '%s\n' "${MATT_SKILLS[@]}" | sort -u | wc -l | tr -d ' ')" = 21
 
 REGISTRY_SKILLS=()
 while IFS='|' read -r id kind _rest; do

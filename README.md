@@ -12,11 +12,11 @@ Use this repository if you want a clean Codex setup with three clear ownership l
 
 1. Codex owns its built-in system skills and plugins.
 2. [Matt Pocock's upstream package](https://github.com/mattpocock/skills) owns the general engineering workflow and remains unmodified.
-3. This repository owns only portable instructions, safety rules, one focused exploration agent, and eleven focused personal skills.
+3. This repository owns only portable instructions, safety rules, one focused exploration agent, and focused personal skills.
 
 The default installer creates only three baseline links. Personal skills are opt-in, and Matt's package is installed from its upstream repository rather than copied here.
 
-Retired orchestration frameworks, replacement handoff implementations, and overlapping cleanup workflows are intentionally absent. Product-specific instructions and repository integrations belong in the repository that owns them.
+Retired orchestration frameworks and overlapping cleanup workflows are intentionally absent. Product-specific instructions and repository integrations belong in the repository that owns them.
 
 ## Prerequisites
 
@@ -83,7 +83,7 @@ Matt's package is an upstream dependency, not a fork in this repository. Install
 npx skills@latest add mattpocock/skills
 ```
 
-Choose the global Codex installation and select the 22 core skills listed in [`config/matt-pocock-skills.txt`](config/matt-pocock-skills.txt), including `setup-matt-pocock-skills`. For a non-interactive installation of exactly that reviewed set from the current upstream branch:
+Choose the global Codex installation and select the 21 core skills listed in [`config/matt-pocock-skills.txt`](config/matt-pocock-skills.txt), including `setup-matt-pocock-skills`. This intentionally excludes Matt's `handoff`, which is replaced by the portable repo-memory workflow below. For a non-interactive installation of exactly that reviewed set from the current upstream branch:
 
 ```bash
 rg -v '^(#|$)' config/matt-pocock-skills.txt \
@@ -91,7 +91,7 @@ rg -v '^(#|$)' config/matt-pocock-skills.txt \
       --global --agent codex --yes --skill
 ```
 
-Do not substitute `--all` if you want this setup's reviewed scope. The upstream repository currently exposes additional general-purpose directories beyond the 22 core skills.
+Do not substitute `--all` if you want this setup's reviewed scope. The upstream repository currently exposes additional general-purpose directories beyond the 21 selected core skills.
 
 The catalog records the upstream commit used for this verification. The installer still reads the current upstream branch, so review upstream changes before reinstalling or updating:
 
@@ -113,7 +113,7 @@ $grill-with-docs → $to-spec → $to-tickets → fresh $implement per ticket �
 - `$implement` owns the spec or ticket, TDD, source changes, local validation, `$code-review`, and the final reviewed local commit.
 - `$ship` starts from that reviewed commit and owns push, pull-request checks and feedback, merge, deployment, and post-deploy verification.
 - Material product, architecture, security, or scope changes discovered during delivery return to `$implement`; `$ship` may make only a small, clearly bounded delivery fix.
-- Matt's `$handoff` creates continuity notes. Personal `$catchup` is its read-only counterpart for rebuilding current context from repository evidence.
+- Personal `$handoff` writes the current checkpoint to repo-root `MEMORY.md`; `$catchup` validates it read-only, and `$latest` reconciles it with remote and ticket state.
 
 ## Portable skill catalog
 
@@ -129,7 +129,7 @@ The component registry at [`config/components.tsv`](config/components.tsv) is th
 | `fugu-advisor` | No | Explicit only | Consult Fugu Ultra for an independent second opinion | Configured Fugu Ultra custom agent |
 | `git-converge-main` | No | Task matched | Converge owned Git state into a clean current main | GitHub CLI for PR and remote checks |
 | `git-state-audit` | No | Explicit only | Produce a read-only git state and cleanup-risk report | GitHub CLI for GitHub-aware checks |
-| `graphify` | No | Task matched | Narrow broad code questions with existing graphs | Graphify CLI |
+| `handoff` | No | Explicit only | Checkpoint work in repo-root `MEMORY.md` | None |
 | `housekeeping` | No | Task matched | Audit and tidy Codex artifacts | None |
 | `latest` | No | Explicit only | Fast-forward main and reconcile established project memory | Git remotes for synchronization |
 | `linear` | No | Task matched | Manage Linear work through its current MCP schema | Linear MCP |
@@ -138,7 +138,7 @@ The component registry at [`config/components.tsv`](config/components.tsv) is th
 | `sentry` | No | Task matched | Inspect production errors read-only | Sentry CLI and authentication |
 | `ship` | No | Explicit only | Deliver a reviewed commit after `$implement` | GitHub CLI and repository delivery tools |
 
-`$catchup` and `$latest` are intentionally different. Use `$catchup` for a fast, read-only status rebuild. Use `$latest` when the active main checkout and persistent project memory must be synchronized with remotes, pull requests, tickets, changelogs, or sibling repositories.
+`$handoff`, `$catchup`, and `$latest` share one repo-root `MEMORY.md`. Use `$handoff` for a small end-of-session checkpoint, `$catchup` for a fast read-only status rebuild, and `$latest` when the active default checkout and memory must be synchronized with remotes, pull requests, tickets, changelogs, or named sibling repositories.
 
 Personal skills are linked to `~/.agents/skills/<name>`, the supported user-level location. Restart an open Codex task if a newly installed skill does not appear.
 
@@ -249,7 +249,7 @@ Run `bash bin/verify.sh` when you also want `codex doctor` to validate the activ
 
 - Installer: macOS and Linux Bash; WSL is the Windows path.
 - Last verified: Codex CLI 0.144.4 and skills CLI 1.5.17 on 2026-07-16.
-- Matt core catalog: 22 unmodified upstream skills verified at `e9fcdf95b402d360f90f1db8d776d5dd450f9234`.
+- Matt core catalog: 21 unmodified upstream skills verified at `e9fcdf95b402d360f90f1db8d776d5dd450f9234`; `handoff` is locally owned.
 - Main-agent model selection is intentionally unset so Codex can use the account's current default. The portable explorer is deliberately pinned to `gpt-5.6-terra` with high reasoning effort.
 - Marketplace and MCP commands are guidance, not pinned copies; review provider changes before updating commands or compatibility pins.
 
