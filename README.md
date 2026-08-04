@@ -138,9 +138,9 @@ The component registry at [`config/components.tsv`](config/components.tsv) is th
 | `fugu-advisor` | No | Explicit only | Consult Fugu Ultra for an independent second opinion | Configured Fugu Ultra custom agent |
 | `git-converge-main` | No | Task matched | Converge owned Git state into a clean current main | GitHub CLI for PR and remote checks |
 | `git-state-audit` | No | Explicit only | Produce a read-only git state and cleanup-risk report | GitHub CLI for GitHub-aware checks |
-| `handoff` | No | Explicit only | Checkpoint work in repo-root `MEMORY.md` | None |
+| `handoff` | No | Explicit only | Checkpoint work in primary-checkout `MEMORY.md` | None |
 | `housekeeping` | No | Task matched | Audit and tidy Codex artifacts | None |
-| `latest` | No | Explicit only | Fast-forward main and reconcile established project memory | Git remotes for synchronization |
+| `latest` | No | Explicit only | Align the default branch, audit local Git, and reconcile memory | Git remotes for synchronization |
 | `linear` | No | Task matched | Manage Linear work through its current MCP schema | Linear MCP |
 | `narrate` | No | Explicit only | Create a concise plain-language visual brief | Visualization capability |
 | `playwright` | No | Task matched | Automate a real browser from the terminal | Node.js and npm |

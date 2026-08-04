@@ -31,6 +31,10 @@ uv run python -m unittest tests/test_config.py
   uv run python -m unittest test_git_state_audit.py
 )
 (
+  cd skills/agents/latest/scripts
+  uv run python -m unittest test_git_state.py
+)
+(
   cd skills/agents/ship/scripts
   uv run python -m unittest test_finalize_local_delivery.py
 )
