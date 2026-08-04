@@ -43,10 +43,11 @@ while IFS= read -r -d '' script; do
   bash -n "$script"
 done < <(find setup.sh bin scripts tests skills -type f -name '*.sh' -print0)
 
-uv run --with ruff ruff check \
+uv run --with ruff==0.15.2 ruff check \
   tests/test_config.py \
   skills/agents/git-converge-main/scripts/*.py \
   skills/agents/git-state-audit/scripts/*.py \
+  skills/agents/latest/scripts/*.py \
   skills/agents/ship/scripts/*.py
 
 codex execpolicy check --pretty --rules rules/default.rules -- git reset --hard HEAD~1 \
