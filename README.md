@@ -107,13 +107,22 @@ Keep Matt's installed files unmodified. Run `$setup-matt-pocock-skills` once in 
 Use the skills compositionally rather than treating them as one autonomous framework:
 
 ```text
-$grill-with-docs → $to-spec → $to-tickets → fresh $implement per ticket → $ship
+$ask-matt → $grill-with-docs → $to-spec → $to-tickets → fresh $implement per ticket → $ship
 ```
 
 - `$implement` owns the spec or ticket, TDD, source changes, local validation, `$code-review`, and the final reviewed local commit.
 - `$ship` starts from that reviewed commit and owns push, pull-request checks and feedback, merge, deployment, and post-deploy verification.
 - Material product, architecture, security, or scope changes discovered during delivery return to `$implement`; `$ship` may make only a small, clearly bounded delivery fix.
-- Personal `$handoff` writes the current checkpoint to repo-root `MEMORY.md`; `$catchup` validates it read-only, and `$latest` reconciles it with remote and ticket state.
+- Keep shaping (`$ask-matt` through `$to-tickets`) in one task. Before the first repository write,
+  move that task to a Codex-managed worktree; commit and ship the shaping artifacts before branching
+  implementation tickets from the updated default branch.
+- Give each implementation ticket one task, worktree, and branch owner. `$code-review` and `$ship`
+  reuse that same worktree; no skill opens a second worktree mid-ticket.
+- Resume work in the same task. Use Codex **Hand off** only to move that task between Local and
+  Worktree; use Git commits and pull requests to move code, not `$handoff`.
+- Personal `$handoff` writes the current project checkpoint to the primary checkout's root
+  `MEMORY.md`; `$catchup` validates it read-only, and `$latest` inventories all linked worktrees
+  before reconciling memory with remote and ticket state.
 
 ## Portable skill catalog
 
@@ -124,7 +133,7 @@ The component registry at [`config/components.tsv`](config/components.tsv) is th
 | `instructions` | Yes | Automatic | Portable global working agreements | None |
 | `rules` | Yes | Automatic | Command escalation and denial policy | None |
 | `axi-routing` | No | Task matched | Choose one efficient tool surface for each operation | AXI CLIs for optional AXI routes |
-| `catchup` | No | Explicit only | Reconcile a handoff with current repository evidence | None |
+| `catchup` | No | Explicit only | Reconcile shared project memory with current repository evidence | None |
 | `design-agentic-systems` | No | Task matched | Design and review agentic systems | None |
 | `fugu-advisor` | No | Explicit only | Consult Fugu Ultra for an independent second opinion | Configured Fugu Ultra custom agent |
 | `git-converge-main` | No | Task matched | Converge owned Git state into a clean current main | GitHub CLI for PR and remote checks |
@@ -138,7 +147,11 @@ The component registry at [`config/components.tsv`](config/components.tsv) is th
 | `sentry` | No | Task matched | Inspect production errors read-only | Sentry CLI and authentication |
 | `ship` | No | Explicit only | Deliver a reviewed commit after `$implement` | GitHub CLI and repository delivery tools |
 
-`$handoff`, `$catchup`, and `$latest` share one repo-root `MEMORY.md`. Use `$handoff` for a small end-of-session checkpoint, `$catchup` for a fast read-only status rebuild, and `$latest` when the active default checkout and memory must be synchronized with remotes, pull requests, tickets, changelogs, or named sibling repositories.
+`$handoff`, `$catchup`, and `$latest` share the primary checkout's root `MEMORY.md`; linked worktrees
+must not create competing copies. Use `$handoff` for a small project-frontier checkpoint, `$catchup`
+for a fast read-only status rebuild, and `$latest` when the default branch, linked worktrees, local
+branches, and memory must be reconciled with remotes, pull requests, tickets, or changelogs. This
+memory does not transfer task ownership: resume the same Codex task and worktree whenever possible.
 
 Personal skills are linked to `~/.agents/skills/<name>`, the supported user-level location. Restart an open Codex task if a newly installed skill does not appear.
 
@@ -248,8 +261,8 @@ Run `bash bin/verify.sh` when you also want `codex doctor` to validate the activ
 ## Compatibility
 
 - Installer: macOS and Linux Bash; WSL is the Windows path.
-- Last verified: Codex CLI 0.144.4 and skills CLI 1.5.17 on 2026-07-16.
-- Matt core catalog: 21 unmodified upstream skills verified at `e9fcdf95b402d360f90f1db8d776d5dd450f9234`; `handoff` is locally owned.
+- Last verified: Codex CLI 0.146.0 and skills CLI 1.5.21 on 2026-08-04.
+- Matt core catalog: 21 unmodified upstream skills verified at `2ab958093e83e0ec752e6c1c5932da465bf23e0c`; `handoff` is locally owned.
 - Main-agent model selection is intentionally unset so Codex can use the account's current default. The portable explorer is deliberately pinned to `gpt-5.6-terra` with high reasoning effort.
 - Marketplace and MCP commands are guidance, not pinned copies; review provider changes before updating commands or compatibility pins.
 

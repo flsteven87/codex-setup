@@ -1,5 +1,5 @@
 # Upstream: https://github.com/mattpocock/skills
-# Verified commit: e9fcdf95b402d360f90f1db8d776d5dd450f9234
+# Verified commit: 2ab958093e83e0ec752e6c1c5932da465bf23e0c
 ask-matt
 code-review
 codebase-design
@@ -8,7 +8,6 @@ domain-modeling
 grill-me
 grill-with-docs
 grilling
-handoff
 implement
 improve-codebase-architecture
 prototype

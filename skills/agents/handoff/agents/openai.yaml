@@ -1,0 +1,6 @@
+interface:
+  display_name: "Handoff"
+  short_description: "Checkpoint work in shared project memory"
+  default_prompt: "Use $handoff to replace the active repository's checkpoint in the primary checkout's MEMORY.md for the next Codex or Claude Code task."
+policy:
+  allow_implicit_invocation: false

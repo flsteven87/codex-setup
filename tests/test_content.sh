@@ -62,6 +62,7 @@ test ! -d "$ROOT/skills/codex"
 test -f "$ROOT/skills/agents/git-converge-main/scripts/git_converge.py"
 test -x "$ROOT/skills/agents/git-state-audit/scripts/git_state_audit.py"
 test -x "$ROOT/skills/agents/housekeeping/scripts/scan.sh"
+test -x "$ROOT/skills/agents/latest/scripts/git_state.py"
 test -x "$ROOT/skills/agents/playwright/scripts/playwright_cli.sh"
 test -f "$ROOT/skills/agents/ship/scripts/finalize_local_delivery.py"
 
