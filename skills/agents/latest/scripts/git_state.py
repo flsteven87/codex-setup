@@ -458,6 +458,27 @@ def path_collision(left: str, right: str) -> bool:
     return left_parts[:shortest] == right_parts[:shortest]
 
 
+def incoming_paths(repo: Path, local_oid: str, remote_oid: str) -> list[str]:
+    """Return paths changed by the fetched default-branch fast-forward."""
+    result = run_git(repo, "diff", "--name-only", "-z", f"{local_oid}..{remote_oid}")
+    if result.returncode != 0:
+        raise GitStateError("cannot enumerate incoming default-branch paths")
+    return [
+        item.decode("utf-8", "surrogateescape")
+        for item in result.stdout.split(b"\0")
+        if item
+    ]
+
+
+def colliding_paths(candidates: list[str], incoming: list[str]) -> list[str]:
+    """Return local paths that overlap paths changed by the fast-forward."""
+    return sorted(
+        path
+        for path in candidates
+        if any(path_collision(path, incoming_path) for incoming_path in incoming)
+    )
+
+
 def untracked_collisions(
     repo: Path,
     worktree: dict[str, Any],
@@ -465,24 +486,39 @@ def untracked_collisions(
     remote_oid: str,
 ) -> list[str]:
     """Return untracked paths that can collide with the fetched fast-forward."""
-    incoming_result = run_git(repo, "diff", "--name-only", "-z", f"{local_oid}..{remote_oid}")
-    if incoming_result.returncode != 0:
-        raise GitStateError("cannot enumerate incoming default-branch paths")
-    incoming = [
-        item.decode("utf-8", "surrogateescape")
-        for item in incoming_result.stdout.split(b"\0")
-        if item
-    ]
+    incoming = incoming_paths(repo, local_oid, remote_oid)
     untracked = [
         entry["path"]
         for entry in worktree["status"]["entries"]
         if "untracked" in entry["categories"]
     ]
-    return sorted(
-        path
-        for path in untracked
-        if any(path_collision(path, incoming_path) for incoming_path in incoming)
+    return colliding_paths(untracked, incoming)
+
+
+def ignored_collisions(
+    repo: Path,
+    worktree: dict[str, Any],
+    local_oid: str,
+    remote_oid: str,
+) -> list[str]:
+    """Return ignored paths that can collide with the fetched fast-forward."""
+    worktree_path = Path(worktree["path"])
+    result = run_git(
+        worktree_path,
+        "ls-files",
+        "--others",
+        "--ignored",
+        "--exclude-standard",
+        "-z",
     )
+    if result.returncode != 0:
+        raise GitStateError("cannot enumerate ignored default-worktree paths")
+    ignored = [
+        item.decode("utf-8", "surrogateescape")
+        for item in result.stdout.split(b"\0")
+        if item
+    ]
+    return colliding_paths(ignored, incoming_paths(repo, local_oid, remote_oid))
 
 
 def blocked_result(
@@ -668,6 +704,15 @@ def sync_default(
                 blockers.append(
                     {"code": "default_status_unreadable", "detail": worktree["status"]["error"]}
                 )
+            if worktree["prunable"] or not worktree["exists"] or not worktree["status"]["ok"]:
+                return blocked_result(
+                    repo,
+                    remote,
+                    default_branch,
+                    fetch,
+                    blockers,
+                    before,
+                )
             collisions = untracked_collisions(
                 repo,
                 worktree,
@@ -676,6 +721,14 @@ def sync_default(
             )
             if collisions:
                 blockers.append({"code": "untracked_incoming_collision", "detail": collisions})
+            ignored = ignored_collisions(
+                repo,
+                worktree,
+                before["local_oid"],
+                before["remote_oid"],
+            )
+            if ignored:
+                blockers.append({"code": "ignored_incoming_collision", "detail": ignored})
             if blockers:
                 return blocked_result(
                     repo,
@@ -689,6 +742,7 @@ def sync_default(
                 Path(worktree["path"]),
                 "merge",
                 "--ff-only",
+                "--no-overwrite-ignore",
                 before["remote_oid"],
             )
             if result.returncode != 0:
@@ -783,11 +837,11 @@ def main() -> int:
     args = parse_args()
     try:
         repo = resolve_repo(args.repo)
-        remote = resolve_remote(repo, args.remote)
         if args.command == "sync-default":
-            result = sync_default(repo, remote, args.default_branch, args.fetch)
+            result = sync_default(repo, args.remote, args.default_branch, args.fetch)
             exit_code = 0 if result["status"] == "aligned" else 2
         else:
+            remote = resolve_remote(repo, args.remote)
             default_branch = resolve_default_branch(repo, remote, args.default_branch)
             result = build_audit(repo, remote, default_branch)
             exit_code = 0
