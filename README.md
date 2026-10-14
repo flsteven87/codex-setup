@@ -4,7 +4,7 @@ A small, reviewable reference setup for [OpenAI Codex](https://developers.openai
 
 > **Review before installing.** This repository intentionally excludes credentials, OAuth state, sessions, plugin caches, live configuration, and machine-specific paths. The installer never overwrites an existing file or foreign symlink.
 
-Last verified: **2026-07-18** with **Codex CLI 0.144.4**, **skills CLI 1.5.17**, and Matt Pocock's skills at commit [`e9fcdf9`](https://github.com/mattpocock/skills/commit/e9fcdf95b402d360f90f1db8d776d5dd450f9234).
+Last verified: **2026-10-14** with **Codex CLI 0.162.1**, **skills CLI 1.7.2**, and Matt Pocock's skills at commit [`49dd158`](https://github.com/mattpocock/skills/commit/49dd158d1076134a641b33efb035946536778336).
 
 ## Who this is for
 
@@ -83,7 +83,7 @@ Matt's package is an upstream dependency, not a fork in this repository. Install
 npx skills@latest add mattpocock/skills
 ```
 
-Choose the global Codex installation and select the 21 core skills listed in [`config/matt-pocock-skills.txt`](config/matt-pocock-skills.txt), including `setup-matt-pocock-skills`. This intentionally excludes Matt's `handoff`, which is replaced by the portable repo-memory workflow below. For a non-interactive installation of exactly that reviewed set from the current upstream branch:
+Choose the global Codex installation and select the 26 core skills listed in [`config/matt-pocock-skills.txt`](config/matt-pocock-skills.txt), including `setup-matt-pocock-skills`. This intentionally excludes Matt's `handoff`, which is replaced by the portable repo-memory workflow below. For a non-interactive installation of exactly that reviewed set from the current upstream branch:
 
 ```bash
 rg -v '^(#|$)' config/matt-pocock-skills.txt \
@@ -91,7 +91,7 @@ rg -v '^(#|$)' config/matt-pocock-skills.txt \
       --global --agent codex --yes --skill
 ```
 
-Do not substitute `--all` if you want this setup's reviewed scope. The upstream repository currently exposes additional general-purpose directories beyond the 21 selected core skills.
+Do not substitute `--all` if you want this setup's reviewed scope. The upstream repository currently exposes additional general-purpose directories beyond the 26 selected core skills.
 
 The catalog records the upstream commit used for this verification. The installer still reads the current upstream branch, so review upstream changes before reinstalling or updating:
 
@@ -261,8 +261,8 @@ Run `bash bin/verify.sh` when you also want `codex doctor` to validate the activ
 ## Compatibility
 
 - Installer: macOS and Linux Bash; WSL is the Windows path.
-- Last verified: Codex CLI 0.146.0 and skills CLI 1.5.21 on 2026-08-04.
-- Matt core catalog: 21 unmodified upstream skills verified at `2ab958093e83e0ec752e6c1c5932da465bf23e0c`; `handoff` is locally owned.
+- Last verified: Codex CLI 0.162.1 and skills CLI 1.7.2 on 2026-10-14.
+- Matt core catalog: 26 unmodified upstream skills verified at `49dd158d1076134a641b33efb035946536778336`; `handoff` is locally owned.
 - Main-agent model selection is intentionally unset so Codex can use the account's current default. The portable explorer is deliberately pinned to `gpt-5.6-terra` with high reasoning effort.
 - Marketplace and MCP commands are guidance, not pinned copies; review provider changes before updating commands or compatibility pins.
 
