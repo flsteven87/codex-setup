@@ -1,5 +1,5 @@
 # Upstream: https://github.com/mattpocock/skills
-# Verified commit: 2ab958093e83e0ec752e6c1c5932da465bf23e0c
+# Verified commit: 49dd158d1076134a641b33efb035946536778336
 ask-matt
 code-review
 codebase-design
@@ -9,15 +9,20 @@ grill-me
 grill-with-docs
 grilling
 implement
+implement-spec
 improve-codebase-architecture
+pr
 prototype
 research
-resolving-merge-conflicts
+retro
 setup-matt-pocock-skills
 tdd
 teach
+to-questionnaire
 to-spec
 to-tickets
 triage
+wait-what
 wayfinder
-writing-great-skills
+wizard
+writing-for-agents

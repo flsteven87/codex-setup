@@ -74,10 +74,10 @@ while IFS= read -r name; do
   MATT_SKILLS+=("$name")
 done <"$ROOT/config/matt-pocock-skills.txt"
 
-test "${#MATT_SKILLS[@]}" = 21
+test "${#MATT_SKILLS[@]}" = 26
 printf '%s\n' "${MATT_SKILLS[@]}" | rg -qx 'setup-matt-pocock-skills'
 ! printf '%s\n' "${MATT_SKILLS[@]}" | rg -qx 'handoff'
-test "$(printf '%s\n' "${MATT_SKILLS[@]}" | sort -u | wc -l | tr -d ' ')" = 21
+test "$(printf '%s\n' "${MATT_SKILLS[@]}" | sort -u | wc -l | tr -d ' ')" = 26
 
 REGISTRY_SKILLS=()
 while IFS='|' read -r id kind _rest; do
